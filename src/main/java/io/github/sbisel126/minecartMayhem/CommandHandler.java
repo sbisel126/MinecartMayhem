@@ -21,11 +21,7 @@ public class CommandHandler implements BasicCommand {
 
     @Override
     public void execute(CommandSourceStack commandSourceStack, String[] args){
-        for(int i=0;i<commands.length;i++){
-            if(){
 
-            }
-        }
     }
 
     @Override
