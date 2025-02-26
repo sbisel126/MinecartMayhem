@@ -8,18 +8,19 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import io.github.sbisel126.minecartMayhem.DatabaseHandler;
-import io.github.sbisel126.minecartMayhem.RaceHandler;
 
 
 public class MinecartMayhem extends JavaPlugin implements Listener {
 
     private final MiniMessage miniMessage;
     private final DatabaseHandler db;
+    private final CommandHandler commander;
+
 
     public MinecartMayhem() {
         this.miniMessage = MiniMessage.miniMessage();
         this.db = new DatabaseHandler();
+        this.commander = new CommandHandler();
     }
 
     @Override
