@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MinecartMayhem.main.iml" filepath="$PROJECT_DIR$/.idea/modules/MinecartMayhem.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/MinecartMayhem.test.iml" filepath="$PROJECT_DIR$/.idea/modules/MinecartMayhem.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/io.github.sbisel126.MinecartMayhem.main.iml" filepath="$PROJECT_DIR$/.idea/modules/io.github.sbisel126.MinecartMayhem.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/io.github.sbisel126.MinecartMayhem.test.iml" filepath="$PROJECT_DIR$/.idea/modules/io.github.sbisel126.MinecartMayhem.test.iml" />
     </modules>
   </component>
 </project>
