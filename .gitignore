@@ -1,5 +1,6 @@
 # taken from https://github.com/github/gitignore/blob/main/Gradle.gitignore
 .gradle
+.idea
 **/build/
 !src/**/build/
 
