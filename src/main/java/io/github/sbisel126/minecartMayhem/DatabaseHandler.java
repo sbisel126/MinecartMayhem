@@ -166,12 +166,16 @@ public class DatabaseHandler {
         return -1;
     }
 
+    // triggered when user joins the server
+    // breaks down a user object and inserts it into the DB
     public void InsertUser(Player user) {
         String UserUUID = String.valueOf(user.getUniqueId());
         String query = String.format("INSERT INTO Players (username, uuid) VALUES (%s, %s);", user.getName(), UserUUID);
+        // we use this format of createStatement, execute, as we do not expect a return value from the DB.
         try(Statement statement = dbConnection.createStatement()) {
             statement.execute(query);
         } catch (SQLException e) {
+            // Is this enough for error handling? I don't think so.
             logger.error(Component.text("Error inserting user: " + e.getMessage()));
         }
     }
