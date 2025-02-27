@@ -108,4 +108,60 @@ public class DatabaseHandler {
             logger.error(Component.text("Error creating table: " + e.getMessage()));
         }
     }
+
+    // Given a map and a Username, returns a Users top score on a map.
+    // returns -1 if user or map not found
+    public int GetUserTopScore(String map, String username) {
+        // get the ID's to search for
+        int MapID = GetMapID(map);
+        int PlayerID = GetPlayerID(username);
+
+        // if the map or player isn't found, early return.
+        if (MapID == -1 || PlayerID == -1) {
+            return -1;
+        }
+        // add ID's to base query
+        String query = String.format("SELECT top_score FROM TopScores WHERE map_id=%d AND player_id=%d", MapID, PlayerID);
+        // run the query
+        try (Statement statement = dbConnection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery(query);
+            if (rs.next()) {
+                // the top score should be the only column returned if it exists.
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            logger.error(Component.text("Error getting user top score from map: " + e.getMessage()));
+        }
+        // return -1 in the event that the DB is unable to find a user's top score on a map.
+        return -1;
+    }
+
+    // Converts map_name String to mapID Integer
+    // returns -1 if map not found
+    public int GetMapID(String map_name) {
+        String query = String.format("SELECT map_id FROM Maps WHERE map_name=%s", map_name);
+        try (Statement statement = dbConnection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery(query);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e){
+            logger.error(Component.text("Error getting map id: " + e.getMessage()));
+        }
+        return -1;
+    }
+    // Converts Username String to PlayerID Integer
+    // returns -1 if map not found
+    public int GetPlayerID(String username) {
+        String query = String.format("SELECT player_id FROM Players WHERE username=%s", username);
+        try (Statement statement = dbConnection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery(query);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e){
+            logger.error(Component.text("Error getting player id: " + e.getMessage()));
+        }
+        return -1;
+    }
 }
