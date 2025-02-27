@@ -78,7 +78,6 @@ public class DatabaseHandler {
             }
         } catch (SQLException e) {
             logger.error(Component.text("Error checking table existence: " + e.getMessage()));
-            e.printStackTrace();
         }
         return false;
     }
@@ -96,6 +95,8 @@ public class DatabaseHandler {
     private void createMapsTable() {
         try(Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE Maps (map_id INTEGER PRIMARY KEY AUTOINCREMENT, map_name TEXT);");
+            statement.execute("INSERT INTO Maps (map_name) VALUES ('Grass');");
+            statement.execute("INSERT INTO Maps (map_name) VALUES ('Sand');");
         } catch (SQLException e) {
             //TODO Handle error
             logger.error(Component.text("Error creating table: " + e.getMessage()));
