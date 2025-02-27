@@ -3,6 +3,7 @@ package io.github.sbisel126.minecartMayhem;
 // for logging to terminal
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.entity.Player;
 
 // awesome documentation of java SQL https://docs.oracle.com/javase/tutorial/jdbc/basics/processingsqlstatements.html
 import java.sql.*;
@@ -163,5 +164,15 @@ public class DatabaseHandler {
             logger.error(Component.text("Error getting player id: " + e.getMessage()));
         }
         return -1;
+    }
+
+    public void InsertUser(Player user) {
+        String UserUUID = String.valueOf(user.getUniqueId());
+        String query = String.format("INSERT INTO Players (username, uuid) VALUES (%s, %s);", user.getName(), UserUUID);
+        try(Statement statement = dbConnection.createStatement()) {
+            statement.execute(query);
+        } catch (SQLException e) {
+            logger.error(Component.text("Error inserting user: " + e.getMessage()));
+        }
     }
 }

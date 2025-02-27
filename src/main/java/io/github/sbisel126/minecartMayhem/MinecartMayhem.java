@@ -30,6 +30,9 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        // insert user into User Database
+        db.InsertUser(event.getPlayer());
+        // Display text to user
         Component text = this.miniMessage.deserialize("Plugin <green>MinecartMayhem</green> loaded successfully.<br>" +
                 "   Not an official Minecraft product. <br>" +
                 "   Not approved by or associated with Mojang. <br>");
