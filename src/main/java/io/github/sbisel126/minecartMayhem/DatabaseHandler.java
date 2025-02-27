@@ -87,7 +87,6 @@ public class DatabaseHandler {
         try(Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE Players (player_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, UUID TEXT);");
         } catch (SQLException e) {
-            //TODO Handle error
             logger.error(Component.text("Error creating table: " + e.getMessage()));
         }
     }
@@ -98,7 +97,6 @@ public class DatabaseHandler {
             statement.execute("INSERT INTO Maps (map_name) VALUES ('Grass');");
             statement.execute("INSERT INTO Maps (map_name) VALUES ('Sand');");
         } catch (SQLException e) {
-            //TODO Handle error
             logger.error(Component.text("Error creating table: " + e.getMessage()));
         }
     }
@@ -107,7 +105,6 @@ public class DatabaseHandler {
         try(Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE TopScores (score_id INTEGER PRIMARY KEY AUTOINCREMENT, map_id INTEGER, player_id INTEGER, top_score INTEGER, FOREIGN KEY(map_id) REFERENCES Maps(map_id), FOREIGN KEY(player_id) REFERENCES Players(player_id));");
         } catch (SQLException e) {
-            //TODO Handle error
             logger.error(Component.text("Error creating table: " + e.getMessage()));
         }
     }
