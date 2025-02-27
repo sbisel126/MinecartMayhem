@@ -19,7 +19,7 @@ public class DatabaseHandler {
         logger.info(Component.text("We connecting to the db"));
         connect();
         logger.info(Component.text("We running db checks"));
-        DatabaseIntegrityCheck();
+        databaseIntegrityCheck();
         logger.info(Component.text("DB ready!"));
     }
 
@@ -43,7 +43,7 @@ public class DatabaseHandler {
 
     // DatabaseIntegrityCheck verifies that the required tables for the game mode exist and are ready to be read/written to
     // should be run during plugin instantiation.
-    private void DatabaseIntegrityCheck() {
+    private void databaseIntegrityCheck() {
         if (!connected) {
             connect();
         }
