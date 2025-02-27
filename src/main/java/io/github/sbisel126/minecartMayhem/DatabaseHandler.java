@@ -10,16 +10,19 @@ import java.sql.*;
 // begin class
 public class DatabaseHandler {
     ComponentLogger logger;
+    private Connection dbConnection;
+    private Boolean connected = false;
+
     public DatabaseHandler(ComponentLogger logger){
+        this.logger = logger;
+
         logger.info(Component.text("We connecting to the db"));
         connect();
-        this.logger = logger;
         logger.info(Component.text("We running db checks"));
         DatabaseIntegrityCheck();
         logger.info(Component.text("DB ready!"));
     }
-    private Connection dbConnection;
-    private Boolean connected = false;
+
     // initializes a connection to the database
     private void connect(){
         var url = "jdbc:sqlite:./MM.db";
