@@ -122,9 +122,11 @@ public class DatabaseHandler {
             return -1;
         }
         // add ID's to base query
-        String query = String.format("SELECT top_score FROM TopScores WHERE map_id=%d AND player_id=%d", MapID, PlayerID);
+        String query = "SELECT top_score FROM TopScores WHERE map_id=? AND player_id=?";
         // run the query
-        try (Statement statement = dbConnection.prepareStatement(query)) {
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setInt(1, MapID);
+            statement.setInt(2, PlayerID);
             ResultSet rs = statement.executeQuery(query);
             if (rs.next()) {
                 // the top score should be the only column returned if it exists.
@@ -140,8 +142,9 @@ public class DatabaseHandler {
     // Converts map_name String to mapID Integer
     // returns -1 if map not found
     public int GetMapID(String map_name) {
-        String query = String.format("SELECT map_id FROM Maps WHERE map_name=%s", map_name);
-        try (Statement statement = dbConnection.prepareStatement(query)) {
+        String query = "SELECT map_id FROM Maps WHERE map_name=%s";
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setString(1, map_name);
             ResultSet rs = statement.executeQuery(query);
             if (rs.next()) {
                 return rs.getInt(1);
@@ -154,8 +157,9 @@ public class DatabaseHandler {
     // Converts Username String to PlayerID Integer
     // returns -1 if map not found
     public int GetPlayerID(String username) {
-        String query = String.format("SELECT player_id FROM Players WHERE username=%s", username);
-        try (Statement statement = dbConnection.prepareStatement(query)) {
+        String query = "SELECT player_id FROM Players WHERE username = ?";
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setString(1, username);
             ResultSet rs = statement.executeQuery(query);
             if (rs.next()) {
                 return rs.getInt(1);
@@ -170,10 +174,12 @@ public class DatabaseHandler {
     // breaks down a user object and inserts it into the DB
     public void InsertUser(Player user) {
         String UserUUID = String.valueOf(user.getUniqueId());
-        String query = String.format("INSERT INTO Players (username, uuid) VALUES (%s, %s);", user.getName(), UserUUID);
+        String query = "INSERT INTO Players (username, uuid) VALUES (?, ?);";
         // we use this format of createStatement, execute, as we do not expect a return value from the DB.
-        try(Statement statement = dbConnection.createStatement()) {
-            statement.execute(query);
+        try(PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setString(1, user.getName());
+            statement.setString(2, UserUUID);
+            statement.executeUpdate();
         } catch (SQLException e) {
             // Is this enough for error handling? I don't think so.
             logger.error(Component.text("Error inserting user: " + e.getMessage()));
