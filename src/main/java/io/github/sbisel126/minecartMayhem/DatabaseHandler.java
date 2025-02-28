@@ -171,8 +171,24 @@ public class DatabaseHandler {
     }
 
     // triggered when user joins the server
+    // checks if user is in database already, if not
     // breaks down a user object and inserts it into the DB
     public void InsertUser(Player user) {
+        // First, check if the user exists within the database
+        String userCheckQuery = "SELECT count(player_id) FROM Players WHERE username=?";
+        try (PreparedStatement checkStatement = dbConnection.prepareStatement(userCheckQuery)) {
+            checkStatement.setString(1, user.getName());
+            ResultSet rs = checkStatement.executeQuery();
+            if (rs.next()) {
+                if (rs.getInt(1) == 1) {
+                    // if row exists, we exit the Insert process. Otherwise, we go to the next block and insert the user
+                    return;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error(Component.text("Error when checking Players: " + e.getMessage()));
+        }
+
         String UserUUID = String.valueOf(user.getUniqueId());
         String query = "INSERT INTO Players (username, uuid) VALUES (?, ?);";
         // we use this format of createStatement, execute, as we do not expect a return value from the DB.
