@@ -1,5 +1,7 @@
 package io.github.sbisel126.minecartMayhem;
 
+import io.github.sbisel126.minecartMayhem.commands.CartMenu;
+import io.github.sbisel126.minecartMayhem.commands.MapMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -9,6 +11,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Objects;
 
 
 public class MinecartMayhem extends JavaPlugin implements Listener {
@@ -24,6 +28,13 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         ComponentLogger logger = getComponentLogger();
         this.db = new DatabaseHandler(logger);
         this.commander = new CommandHandler();
+
+        Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
+        Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
+
+        new RaceHandler(logger, this);
+        new MapMenu(logger, this);
+        new CartMenu(logger, this);
 
         logger.info(Component.text("Hello world!"));
     }

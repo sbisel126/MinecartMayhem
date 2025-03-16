@@ -2,3 +2,16 @@ name: MinecartMayhem
 version: '1.0-SNAPSHOT'
 main: io.github.sbisel126.minecartMayhem.MinecartMayhem
 api-version: '1.21'
+commands:
+  map_menu:
+    description: Opens the map selection menu.
+    usage: /map_menu
+    aliases: map
+    permission: map_menu
+    permission-message: You do not have permission to open the map menu.
+  cart_menu:
+    description: Opens the cart election menu.
+    usage: /cart_menu
+    aliases: cart
+    permission: cart_menu
+    permission-message: You do not have permission to open the cart menu.

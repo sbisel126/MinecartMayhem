@@ -19,6 +19,10 @@ public class CommandHandler implements BasicCommand {
 
     }
 
+    public CommandHandler(String[] commands){
+        this.commands = commands;
+    }
+
     @Override
     public void execute(CommandSourceStack commandSourceStack, String[] args){
 
