@@ -124,6 +124,20 @@ public class MinecartHandler {
                 int state = movementState.getOrDefault(player, 0);
                 boolean climbing = isClimbing.getOrDefault(player, false);
 
+                // Apply gravity if boat is in the air and not actively climbing
+                if (!boat.isOnGround() && !climbing) {
+                    Vector currentVelocity = boat.getVelocity();
+                    // Apply stronger downward acceleration (more negative Y value = stronger gravity)
+                    currentVelocity.setY(currentVelocity.getY() - 0.15); // Increase this value for stronger gravity
+
+                    // Set a terminal velocity to prevent falling too fast
+                    if (currentVelocity.getY() < -1.0) {
+                        currentVelocity.setY(-1.0);
+                    }
+
+                    boat.setVelocity(currentVelocity);
+                }
+
                 if (state == 1) { // Forward
                     Vector direction = boat.getLocation().getDirection().normalize();
 
