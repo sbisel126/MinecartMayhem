@@ -1,5 +1,6 @@
 package io.github.sbisel126.minecartMayhem.commands;
 
+import io.github.sbisel126.minecartMayhem.MinecartHandler;
 import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -12,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -25,9 +27,11 @@ public class CartMenu implements Listener, CommandExecutor {
     private ComponentLogger logger;
     private final Integer red_cart = 11;
     private final Integer blue_cart = 15;
+    private MinecartHandler minecartHandler;
 
     public CartMenu(ComponentLogger logger, MinecartMayhem plugin){
         this.logger = logger;
+        this.minecartHandler = new MinecartHandler(plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("MapMenu initialized."));
     }
@@ -37,17 +41,21 @@ public class CartMenu implements Listener, CommandExecutor {
         if (!event.getView().getTitle().equals(invName)){
             return;
         }
-
+        if (!(event.getAction() == InventoryAction.PICKUP_ALL)) {
+            return;
+        }
         Player player = (Player) event.getWhoClicked();
         int slot = event.getSlot();
 
         if (slot == red_cart){
             player.sendMessage("Red Cart selected");
+            minecartHandler.PutPlayerInCart(player, true);
             //player.teleport();
+            event.getInventory().close();
         } else if (slot == blue_cart) {
             player.sendMessage("Blue Cart selected");
-        } else {
-            player.sendMessage("Empty box selected");
+            minecartHandler.PutPlayerInCart(player, false);
+            event.getInventory().close();
         }
 
         event.setCancelled(true);

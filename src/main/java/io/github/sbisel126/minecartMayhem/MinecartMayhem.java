@@ -18,7 +18,6 @@ import java.util.Objects;
 public class MinecartMayhem extends JavaPlugin implements Listener {
     private MiniMessage miniMessage;
     private DatabaseHandler db;
-    private CommandHandler commander;
 
     @Override
     public void onEnable() {
@@ -27,14 +26,11 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         this.miniMessage = MiniMessage.miniMessage();
         ComponentLogger logger = getComponentLogger();
         this.db = new DatabaseHandler(logger);
-        this.commander = new CommandHandler();
 
         Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
 
         new RaceHandler(logger, this);
-        new MapMenu(logger, this);
-        new CartMenu(logger, this);
 
         logger.info(Component.text("Hello world!"));
     }
