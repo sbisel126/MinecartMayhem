@@ -113,11 +113,15 @@ public class MinecartHandler {
         new BukkitRunnable() {
             @Override
             public void run() {
+                // if something we don't like happens, just send the player back to the spawn area and remove them from the race.
                 if (boat.isDead() || !player.isInsideVehicle() || !(player.getVehicle() instanceof Boat)) {
                     this.cancel();
                     movementState.remove(player);
                     isClimbing.remove(player);
                     boat.remove();
+                    // send back to hub area
+                    player.teleport(new Location(player.getWorld(), -24, -60, 574));
+                    // remove from race complete
                     return;
                 }
 

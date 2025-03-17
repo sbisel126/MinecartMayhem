@@ -6,6 +6,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -37,23 +39,28 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
         // insert user into User Database
-        db.InsertUser(event.getPlayer());
+        db.InsertUser(player);
         // Display text to user
         Component text = this.miniMessage.deserialize("Plugin <green>MinecartMayhem</green> loaded successfully.<br>" +
                 "   Not an official Minecraft product. <br>" +
                 "   Not approved by or associated with Mojang. <br>");
-        event.getPlayer().sendMessage(text);
-        if(event.getPlayer().isOp()){
+        player.sendMessage(text);
+
+        // send player to hub area
+        player.teleport(new Location(player.getWorld(), -24, -60, 574));
+
+        if(player.isOp()){
             Component opMessage = this.miniMessage.deserialize("<green>MinecartMayhem</green> detected you are a server <red>operator</red><br>" +
                             "   Available <red>operator</red> commands are:<br>" +
                             "   <yellow>ExampleCommand1</yellow>: Description of command1<br>" +
                             "   <yellow>ExampleCommand2</yellow>: Description of command2");
-            event.getPlayer().sendMessage(opMessage);
+            player.sendMessage(opMessage);
 
         }else{
             Component message = this.miniMessage.deserialize("<green>MinecartMayhem</green> ");
-            event.getPlayer().sendMessage(message);
+            player.sendMessage(message);
         }
     }
 
