@@ -9,6 +9,7 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -25,15 +26,15 @@ public class MinecartHandler {
     private final Map<Player, Integer> movementState = new HashMap<>();
 
     public MinecartHandler(JavaPlugin plugin) {
-            this.plugin = plugin;
-            this.protocolManager = ProtocolLibrary.getProtocolManager();
+        this.plugin = plugin;
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    public void PutPlayerInCart(Player player, boolean cartType){
+    public void PutPlayerInCart(Player player, boolean cartType) {
         Location loc = player.getLocation();
         Boat boat;
         // Create a boat at the player's location
-        if (cartType){
+        if (cartType) {
             boat = (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
         } else {
             boat = (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
@@ -47,6 +48,9 @@ public class MinecartHandler {
 
 
     private void startBoatControl(Player player, Boat boat) {
+        // Add this map to track when the boat is climbing
+        final Map<Player, Boolean> isClimbing = new HashMap<>();
+
         protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
@@ -61,11 +65,47 @@ public class MinecartHandler {
                 boolean backward = booleans.read(1);
 
                 if (forward) {
-                    movementState.put(player, 1); // Forward movement
+                    movementState.put(player, 1); // Mark as moving forward
+
+                    // More precise obstacle detection
+                    Vector direction = player.getLocation().getDirection().normalize();
+                    Location boatLoc = boat.getLocation();
+
+                    // Check if there's a block at the front lower part of the boat
+                    Location frontLoc = boatLoc.clone().add(direction.clone().multiply(1.2));
+                    frontLoc.setY(boatLoc.getY()); // Check at boat level
+
+                    // Check if there's a block in front that the boat needs to climb
+                    boolean needsToClimb = false;
+
+                    // Check if there's a solid block in front
+                    if (!frontLoc.getBlock().isPassable()) {
+                        // Check if there's space above for the boat to climb to
+                        Location aboveFrontLoc = frontLoc.clone().add(0, 1, 0);
+                        if (aboveFrontLoc.getBlock().isPassable()) {
+                            needsToClimb = true;
+                        }
+                    }
+
+                    // Also check specifically for stairs and slabs
+                    Material frontBlockType = frontLoc.getBlock().getType();
+                    if (frontBlockType.name().contains("STAIRS") ||
+                            frontBlockType.name().contains("SLAB") ||
+                            frontBlockType.name().contains("STEP")) {
+                        needsToClimb = true;
+                    }
+                    if (frontBlockType.name().contains("WOOL")) {
+                        needsToClimb = false;
+                    }
+
+                    isClimbing.put(player, needsToClimb);
+
                 } else if (backward) {
                     movementState.put(player, -1); // Backward movement
+                    isClimbing.put(player, false);
                 } else {
                     movementState.put(player, 0); // No movement
+                    isClimbing.put(player, false);
                 }
             }
         });
@@ -76,14 +116,26 @@ public class MinecartHandler {
                 if (boat.isDead() || !player.isInsideVehicle() || !(player.getVehicle() instanceof Boat)) {
                     this.cancel();
                     movementState.remove(player);
+                    isClimbing.remove(player);
+                    boat.remove();
                     return;
                 }
 
                 int state = movementState.getOrDefault(player, 0);
+                boolean climbing = isClimbing.getOrDefault(player, false);
 
                 if (state == 1) { // Forward
                     Vector direction = boat.getLocation().getDirection().normalize();
-                    boat.setVelocity(direction.multiply(1.5));
+
+                    if (climbing) {
+                        // Apply climbing velocity only if boat isn't already moving too fast up
+                        if (boat.getVelocity().getY() < 0.5) {
+                            boat.setVelocity(direction.multiply(1.0).setY(0.4)); // Lower speed and lower jump for smoother climbing
+                        }
+                    } else {
+                        // Normal forward movement
+                        boat.setVelocity(direction.multiply(1.5));
+                    }
                 } else if (state == -1) { // Backward
                     Vector direction = boat.getLocation().getDirection().normalize();
                     direction.setZ(-direction.getZ());
@@ -96,4 +148,4 @@ public class MinecartHandler {
             }
         }.runTaskTimer(plugin, 0L, 1L); // Runs every tick (20 ticks per second)
     }
-}
+    }
