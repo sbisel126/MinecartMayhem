@@ -62,10 +62,8 @@ public class MinecartHandler {
 
                 if (forward) {
                     movementState.put(player, 1); // Forward movement
-                    System.out.println("Boosting forward");
                 } else if (backward) {
                     movementState.put(player, -1); // Backward movement
-                    System.out.println("Boosting backward");
                 } else {
                     movementState.put(player, 0); // No movement
                 }
