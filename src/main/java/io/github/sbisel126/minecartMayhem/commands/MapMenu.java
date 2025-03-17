@@ -42,9 +42,11 @@ public class MapMenu implements Listener, CommandExecutor {
         if (slot == grass_map){
             player.sendMessage("Grass Map selected");
             player.teleport(new Location(player.getWorld(), 266.0, -59.0, -52.0, -175, 5));
+            event.getInventory().close();
         } else if (slot == sand_map) {
             player.sendMessage("Sand Map selected");
             player.teleport(new Location(player.getWorld(), -270.0, -60.0, 52.0, 1, 0));
+            event.getInventory().close();
         }
 
         event.setCancelled(true);
