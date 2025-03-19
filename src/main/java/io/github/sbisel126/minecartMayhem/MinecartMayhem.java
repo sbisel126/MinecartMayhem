@@ -54,12 +54,14 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         if(player.isOp()){
             Component opMessage = this.miniMessage.deserialize("<green>MinecartMayhem</green> detected you are a server <red>operator</red><br>" +
                             "   Available <red>operator</red> commands are:<br>" +
-                            "   <yellow>ExampleCommand1</yellow>: Description of command1<br>" +
-                            "   <yellow>ExampleCommand2</yellow>: Description of command2");
+                            "   <yellow>ExampleOpCommand1</yellow>: Description of command1<br>" +
+                            "   <yellow>ExampleOpCommand2</yellow>: Description of command2");
             player.sendMessage(opMessage);
 
         }else{
-            Component message = this.miniMessage.deserialize("<green>MinecartMayhem</green> ");
+            Component message = this.miniMessage.deserialize("<green>MinecartMayhem</green> "+
+                    "   <yellow>map_menu</yellow>: Opens the map selection user interface.<br>" +
+                    "   <yellow>cart_menu</yellow>: Opens the cart selection user interface.");
             player.sendMessage(message);
         }
     }

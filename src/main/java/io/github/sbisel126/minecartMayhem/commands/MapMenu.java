@@ -4,7 +4,9 @@ import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -23,20 +25,20 @@ import java.util.List;
 
 public class MapMenu implements Listener, CommandExecutor {
     private final String invName = "Map Selector";
-    private ComponentLogger logger;
     private final Integer grass_map = 11;
     private final Integer sand_map = 15;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final ComponentLogger logger;
 
-    public MapMenu(ComponentLogger logger, MinecartMayhem plugin){
+    public MapMenu(ComponentLogger logger, MinecartMayhem plugin) {
         this.logger = logger;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("MapMenu initialized."));
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event){
-        if (!event.getView().title().toString().contains(invName)){
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!event.getView().title().toString().contains(invName)) {
             //This is not the inventory you're looking for...
             return;
         }
@@ -45,7 +47,7 @@ public class MapMenu implements Listener, CommandExecutor {
 
         int slot = event.getSlot();
 
-        if (slot == grass_map){
+        if (slot == grass_map) {
             player.sendMessage("Grass Map selected");
             player.teleport(new Location(player.getWorld(), 266.0, -59.0, -52.0, -175, 5));
             event.getInventory().close();
@@ -59,8 +61,8 @@ public class MapMenu implements Listener, CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String  label, String @NotNull [] args){
-        if(!(sender instanceof Player player)){
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can execute this command.");
             return true;
         }
@@ -75,13 +77,13 @@ public class MapMenu implements Listener, CommandExecutor {
         return true;
     }
 
-    private ItemStack getItem(ItemStack item, String name, String ... lore){
+    private ItemStack getItem(ItemStack item, String name, String... lore) {
         ItemMeta meta = item.getItemMeta();
         meta.customName(miniMessage.deserialize(String.format("<green>%s</green>", name)));
 
         List<Component> lores = new ArrayList<>();
 
-        for(String s : lore){
+        for (String s : lore) {
             lores.add(miniMessage.deserialize(String.format("<blue>%s</blue>", s)));
         }
         meta.lore(lores);

@@ -26,7 +26,7 @@ public class DatabaseHandler {
 
     // initializes a connection to the database
     private void connect(){
-        var url = "jdbc:sqlite:./MM.db";
+        var url = "jdbc:sqlite:./plugins/MinecartMayhem/MM.db";
 
         if (connected) {
             return;

@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,7 +17,6 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -28,22 +26,22 @@ import java.util.List;
 
 public class CartMenu implements Listener, CommandExecutor {
     private final String invName = "Cart Selector";
-    private ComponentLogger logger;
     private final Integer red_cart = 11;
     private final Integer blue_cart = 15;
-    private MinecartHandler minecartHandler;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final ComponentLogger logger;
+    private final MinecartHandler minecartHandler;
 
-    public CartMenu(ComponentLogger logger, MinecartMayhem plugin){
+    public CartMenu(ComponentLogger logger, MinecartMayhem plugin) {
         this.logger = logger;
         this.minecartHandler = new MinecartHandler(plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        logger.info(Component.text("MapMenu initialized."));
+        logger.info(Component.text("CartMenu initialized."));
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event){
-        if (!event.getView().title().toString().contains(invName)){
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (!event.getView().title().toString().contains(invName)) {
             //This is not the inventory you're looking for...
             return;
         }
@@ -53,7 +51,7 @@ public class CartMenu implements Listener, CommandExecutor {
         Player player = (Player) event.getWhoClicked();
         int slot = event.getSlot();
 
-        if (slot == red_cart){
+        if (slot == red_cart) {
             player.sendMessage("Red Cart selected");
             minecartHandler.PutPlayerInCart(player, true);
 
@@ -68,8 +66,8 @@ public class CartMenu implements Listener, CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String  label, String @NotNull [] args){
-        if(!(sender instanceof Player player)){
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can execute this command.");
             return true;
         }
@@ -84,13 +82,13 @@ public class CartMenu implements Listener, CommandExecutor {
         return true;
     }
 
-    private ItemStack getItem(ItemStack item, String name, String ... lore){
+    private ItemStack getItem(ItemStack item, String name, String... lore) {
         ItemMeta meta = item.getItemMeta();
         meta.customName(miniMessage.deserialize(String.format("<green>%s</green>", name)));
 
         List<Component> lores = new ArrayList<>();
 
-        for(String s : lore){
+        for (String s : lore) {
             lores.add(miniMessage.deserialize(String.format("<blue>%s</blue>", s)));
         }
         meta.lore(lores);
