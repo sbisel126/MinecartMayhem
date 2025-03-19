@@ -3,6 +3,7 @@ package io.github.sbisel126.minecartMayhem.commands;
 import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,18 +12,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MapMenu implements Listener, CommandExecutor {
-    private String invName = "Map Selector";
+    private final String invName = "Map Selector";
     private ComponentLogger logger;
     private final Integer grass_map = 11;
     private final Integer sand_map = 15;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public MapMenu(ComponentLogger logger, MinecartMayhem plugin){
         this.logger = logger;
@@ -32,11 +36,13 @@ public class MapMenu implements Listener, CommandExecutor {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event){
-        if (!event.getView().getTitle().equals(invName)){
+        if (!event.getView().title().toString().contains(invName)){
+            //This is not the inventory you're looking for...
             return;
         }
 
         Player player = (Player) event.getWhoClicked();
+
         int slot = event.getSlot();
 
         if (slot == grass_map){
@@ -53,19 +59,16 @@ public class MapMenu implements Listener, CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String  label, String[] args){
-        if(!(sender instanceof Player)){
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String  label, String @NotNull [] args){
+        if(!(sender instanceof Player player)){
             sender.sendMessage("Only players can execute this command.");
             return true;
         }
 
-        Player player = (Player) sender;
+        Inventory inv = Bukkit.createInventory(player, InventoryType.CHEST, miniMessage.deserialize(invName));
 
-        Inventory inv = Bukkit.createInventory(player, 9*4, invName);
-
-
-        inv.setItem(grass_map, getItem(new ItemStack(Material.GRASS_BLOCK), "&9Grass Map", "&aClick to join", "&aRace on the Grass Map"));
-        inv.setItem(sand_map, getItem(new ItemStack(Material.SAND), "&9Sand Map", "&aClick to join", "&aRace on the Sand Map"));
+        inv.setItem(grass_map, getItem(new ItemStack(Material.GRASS_BLOCK), "Grass Map", "Click to join", "Race on the Grass Map"));
+        inv.setItem(sand_map, getItem(new ItemStack(Material.SAND), "Sand Map", "Click to join", "Race on the Sand Map"));
 
         player.openInventory(inv);
 
@@ -74,14 +77,14 @@ public class MapMenu implements Listener, CommandExecutor {
 
     private ItemStack getItem(ItemStack item, String name, String ... lore){
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+        meta.customName(miniMessage.deserialize(String.format("<green>%s</green>", name)));
 
-        List<String> lores = new ArrayList<>();
+        List<Component> lores = new ArrayList<>();
 
         for(String s : lore){
-            lores.add(ChatColor.translateAlternateColorCodes('&', s));
+            lores.add(miniMessage.deserialize(String.format("<blue>%s</blue>", s)));
         }
-        meta.setLore(lores);
+        meta.lore(lores);
 
         item.setItemMeta(meta);
         return item;
