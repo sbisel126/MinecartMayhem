@@ -19,9 +19,10 @@ private void startBoatControl(Player player, Boat boat) {
             boolean backward = booleans.read(1);
             boolean left = booleans.read(2);
             boolean right = booleans.read(3);
+            boolean sneaking = event.getPlayer().isSneaking(); // Detect if player is sneaking
 
-            // Detect drifting (both left & right pressed)
-            boolean drifting = left && right;
+            // Drifting requires sneak + turning (left or right)
+            boolean drifting = sneaking && (left || right);
             isDrifting.put(player, drifting);
             
             // Start drift timer if drifting begins
