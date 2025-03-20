@@ -1,12 +1,14 @@
 private void startBoatControl(Player player, Boat boat) {
+    // Maps to track climbing, drifting, and drift duration
     final Map<Player, Boolean> isClimbing = new ConcurrentHashMap<>();
     final Map<Player, Boolean> isDrifting = new ConcurrentHashMap<>();
     final Map<Player, Long> driftStartTime = new ConcurrentHashMap<>();
     
+    // Listen for vehicle control packets (player input)
     protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
         @Override
         public void onPacketReceiving(PacketEvent event) {
-            if (event.getPlayer() != player) return;
+            if (event.getPlayer() != player) return; // Ignore packets from other players
 
             PacketContainer packet = event.getPacket();
             StructureModifier<Boolean> booleans = packet.getStructures().read(0).getBooleans();
@@ -18,13 +20,16 @@ private void startBoatControl(Player player, Boat boat) {
             boolean left = booleans.read(2);
             boolean right = booleans.read(3);
 
-            boolean drifting = left && right; // Assume drifting is triggered by pressing both keys
+            // Detect drifting (both left & right pressed)
+            boolean drifting = left && right;
             isDrifting.put(player, drifting);
             
+            // Start drift timer if drifting begins
             if (drifting && !driftStartTime.containsKey(player)) {
-                driftStartTime.put(player, System.currentTimeMillis()); // Start drift timer
+                driftStartTime.put(player, System.currentTimeMillis());
             }
 
+            // Update movement state: 1 = forward, -1 = backward, 0 = idle
             if (forward) {
                 movementState.put(player, 1);
             } else if (backward) {
@@ -35,9 +40,11 @@ private void startBoatControl(Player player, Boat boat) {
         }
     });
 
+    // Repeated task to handle movement, physics, and drift mechanics
     new BukkitRunnable() {
         @Override
         public void run() {
+            // If the boat is removed or the player exits, clean up
             if (boat.isDead() || !player.isInsideVehicle() || !(player.getVehicle() instanceof Boat)) {
                 this.cancel();
                 movementState.remove(player);
@@ -45,43 +52,44 @@ private void startBoatControl(Player player, Boat boat) {
                 isDrifting.remove(player);
                 driftStartTime.remove(player);
                 boat.remove();
-                player.teleport(new Location(player.getWorld(), -24, -60, 574));
+                player.teleport(new Location(player.getWorld(), -24, -60, 574)); // Send back to hub
                 return;
             }
 
-            int state = movementState.getOrDefault(player, 0);
+            int state = movementState.getOrDefault(player, 0); // Get movement state
             boolean climbing = isClimbing.getOrDefault(player, false);
             boolean drifting = isDrifting.getOrDefault(player, false);
             
             Vector direction = boat.getLocation().getDirection().normalize();
             Vector velocity = boat.getVelocity();
 
-            // Apply gravity when not on the ground
+            // Apply stronger gravity when airborne (for better control)
             if (!boat.isOnGround() && !climbing) {
-                velocity.setY(Math.max(velocity.getY() - 0.1, -1.0));
+                velocity.setY(Math.max(velocity.getY() - 0.1, -1.0)); // Adjust gravity as needed
             }
 
             if (state == 1) { // Moving forward
                 if (drifting) {
-                    // Apply drift movement (sideways slip)
+                    // Apply sideways drifting force (sliding effect)
                     Vector sideways = new Vector(-direction.getZ(), 0, direction.getX()).multiply(0.8);
                     velocity.add(sideways);
 
-                    // Check if player held drift long enough for a boost
+                    // Check if drift boost should activate
                     long driftDuration = System.currentTimeMillis() - driftStartTime.getOrDefault(player, 0L);
-                    if (driftDuration > 1000) { // 1 second drift grants boost
-                        velocity.add(direction.multiply(0.3)); // Small boost
+                    if (driftDuration > 1000) { // If drifting for >1 second, apply speed boost
+                        velocity.add(direction.multiply(0.3)); // Add small forward boost
                     }
                 } else {
-                    velocity.add(direction.multiply(0.1)); // Smooth acceleration
+                    // Normal acceleration when not drifting
+                    velocity.add(direction.multiply(0.1));
                 }
             } else if (state == -1) { // Moving backward
-                velocity.add(direction.multiply(-0.08)); // Slower backward speed
+                velocity.add(direction.multiply(-0.08)); // Slow backward speed
             } else {
-                velocity.multiply(0.95); // Gradual slowdown
+                velocity.multiply(0.95); // Gradual slowdown when idle
             }
 
-            boat.setVelocity(velocity);
+            boat.setVelocity(velocity); // Apply the final calculated velocity
         }
-    }.runTaskTimer(plugin, 0L, 1L);
+    }.runTaskTimer(plugin, 0L, 1L); // Run every tick (20 times per second)
 }
