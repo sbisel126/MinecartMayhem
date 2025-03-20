@@ -71,23 +71,32 @@ private void startBoatControl(Player player, Boat boat) {
 
             if (state == 1) { // Moving forward
                 if (drifting) {
-                    // Apply sideways drifting force (sliding effect)
-                    Vector sideways = new Vector(-direction.getZ(), 0, direction.getX()).multiply(0.8);
+                    // Apply sideways drifting force (gradual effect for smooth drift)
+                    Vector sideways = new Vector(-direction.getZ(), 0, direction.getX()).multiply(0.6); // Reduced from 0.8 to 0.6 for better control
                     velocity.add(sideways);
+
+                    // Slightly reduce forward speed while drifting
+                    velocity.multiply(0.97); 
 
                     // Check if drift boost should activate
                     long driftDuration = System.currentTimeMillis() - driftStartTime.getOrDefault(player, 0L);
-                    if (driftDuration > 1000) { // If drifting for >1 second, apply speed boost
-                        velocity.add(direction.multiply(0.3)); // Add small forward boost
+                    if (driftDuration > 1200) { // If drifting for >1.2 seconds, apply stronger speed boost
+                        velocity.add(direction.multiply(0.4)); // Increased from 0.3 to 0.4 for rewarding drift
                     }
                 } else {
                     // Normal acceleration when not drifting
-                    velocity.add(direction.multiply(0.1));
+                    velocity.add(direction.multiply(0.12)); // Increased from 0.1 to 0.12 for a slightly better acceleration
                 }
             } else if (state == -1) { // Moving backward
-                velocity.add(direction.multiply(-0.08)); // Slow backward speed
+                velocity.add(direction.multiply(-0.07)); // Adjusted backward speed (slightly slower)
             } else {
-                velocity.multiply(0.95); // Gradual slowdown when idle
+                velocity.multiply(0.94); // Gradual slowdown when idle, making handling smoother
+            }
+
+            // Limit the max speed of the boat to prevent unrealistic acceleration
+            double maxSpeed = drifting ? 1.5 : 2.2; // Drift mode has lower max speed for better control
+            if (velocity.length() > maxSpeed) {
+                velocity.normalize().multiply(maxSpeed);
             }
 
             boat.setVelocity(velocity); // Apply the final calculated velocity
