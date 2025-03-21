@@ -1,3 +1,4 @@
+
 private void startBoatControl(Player player, Boat boat) {
     // Maps to track climbing, drifting, and drift duration
     final Map<Player, Boolean> isClimbing = new ConcurrentHashMap<>();
