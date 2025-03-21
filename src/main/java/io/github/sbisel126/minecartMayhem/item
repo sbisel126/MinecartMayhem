@@ -74,7 +74,7 @@ public class ItemBoxManager implements Listener {
         List<ItemStack> powerUps = Arrays.asList(
                 createItem(Material.FEATHER, "Speed Boost"),
                 createItem(Material.SNOWBALL, "Ice Ball"),
-                createItem(Material.BANANA, "Banana Peel"),
+               // banana model not in yet createItem(Material.BANANA, "Banana Peel"),
                 createItem(Material.TURTLE_EGG, "Green Shell"),
                 createItem(Material.FIRE_CHARGE, "Fireball"),
                 createItem(Material.SHIELD, "Temporary Shield")
@@ -97,4 +97,14 @@ public class ItemBoxManager implements Listener {
         }
         return item;
     }
+}
+// put in the main plug in class
+@Override
+public void onEnable() {
+    ItemBoxManager itemBoxManager = new ItemBoxManager(this);
+    Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
+
+    // Example: Add some item boxes at race track locations
+    itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 100, 65, 200));
+    itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 150, 65, 250));
 }
