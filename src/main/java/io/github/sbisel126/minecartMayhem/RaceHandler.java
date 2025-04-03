@@ -7,13 +7,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 
 public class RaceHandler {
     private JavaPlugin plugin;
-    private final ScheduledExecutorService scheduler;
     private Instant startTime;
     private Integer baseScore;
     private Integer difficulty;
@@ -21,7 +18,6 @@ public class RaceHandler {
     private Player player;
 
     public RaceHandler(JavaPlugin plugin, Player player, Integer baseMapScore, Integer difficultyMultiplier, long maxTime) {
-        this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.baseScore = baseMapScore;
         this.difficulty = difficultyMultiplier;
         this.maxTime = maxTime;
@@ -47,9 +43,9 @@ public class RaceHandler {
                 }
                 totalScore *= difficulty.doubleValue();
 
-                player.sendMessage("Your score is " + totalScore);
+                player.sendMessage("Your score is " + (int)totalScore);
             }
-        }.runTaskLaterAsynchronously(plugin, maxTime);
+        }.runTaskLaterAsynchronously(plugin, maxTime/20);
     }
 
 }
