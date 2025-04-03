@@ -2,6 +2,7 @@ package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
 import io.github.sbisel126.minecartMayhem.commands.MapMenu;
+import io.github.sbisel126.minecartMayhem.commands.StartRace;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -31,10 +32,14 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
 
         Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
+        Objects.requireNonNull(getCommand("start_race")).setExecutor(new StartRace(logger, this));
 
-        new RaceHandler(logger, this);
+        //logger.info(Component.text("Hello world!"));
+    }
 
-        logger.info(Component.text("Hello world!"));
+    @Override
+    public void onDisable(){
+
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -65,5 +70,4 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
             player.sendMessage(message);
         }
     }
-
 }

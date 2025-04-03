@@ -15,3 +15,9 @@ commands:
     aliases: cart
     permission: cart_menu
     permission-message: You do not have permission to open the cart menu.
+  start_race:
+    description: Starts the race clock.
+    usage: /start_race
+    aliases: race
+    permission: start_race
+    permission-message: You do not have permission to start a race.
