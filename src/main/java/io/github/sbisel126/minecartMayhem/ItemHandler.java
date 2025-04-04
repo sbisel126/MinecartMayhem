@@ -13,12 +13,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-public class ItemBoxManager implements Listener {
+public class ItemHandler implements Listener {
     private final JavaPlugin plugin;
     private final Set<Location> itemBoxLocations = new HashSet<>();
     private final Map<Location, Boolean> activeItemBoxes = new HashMap<>();
 
-    public ItemBoxManager(JavaPlugin plugin) {
+    public ItemHandler(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -97,14 +97,4 @@ public class ItemBoxManager implements Listener {
         }
         return item;
     }
-}
-// put in the main plug in class
-@Override
-public void onEnable() {
-    ItemBoxManager itemBoxManager = new ItemBoxManager(this);
-    Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
-
-    // Example: Add some item boxes at race track locations
-    itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 100, 65, 200));
-    itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 150, 65, 250));
 }

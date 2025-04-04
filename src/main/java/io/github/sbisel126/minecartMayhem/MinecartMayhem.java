@@ -34,6 +34,13 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
         Objects.requireNonNull(getCommand("start_race")).setExecutor(new StartRace(logger, this));
 
+        ItemHandler itemBoxManager = new ItemHandler(this);
+        Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
+
+        // Example: Add some item boxes at racetrack locations
+        itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 100, 65, 200));
+        itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 150, 65, 250));
+
         //logger.info(Component.text("Hello world!"));
     }
 
