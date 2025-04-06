@@ -70,6 +70,11 @@ public class DatabaseHandler {
             logger.info(Component.text("TopScores table does not exist, creating..."));
             createTopScoresTable();
         }
+
+        if (!doesTableExist("PlayerConfig")) {
+            logger.info(Component.text("PlayerConfig table does not exist, creating..."));
+            createPlayerConfigTable();
+        }
     }
 
     // helper function for DatabaseIntegrityCheck that checks for the presence of a table
@@ -114,6 +119,43 @@ public class DatabaseHandler {
             statement.execute("CREATE TABLE TopScores (score_id INTEGER PRIMARY KEY AUTOINCREMENT, map_id INTEGER, player_id INTEGER, top_score INTEGER, FOREIGN KEY(map_id) REFERENCES Maps(map_id), FOREIGN KEY(player_id) REFERENCES Players(player_id));");
         } catch (SQLException e) {
             logger.error(Component.text("Error creating table: " + e.getMessage()));
+        }
+    }
+
+    private void createPlayerConfigTable() {
+        try(Statement statement = dbConnection.createStatement()) {
+            statement.execute("CREATE TABLE PlayerConfig (player_id INTEGER PRIMARY KEY,boat_color INTEGER, FOREIGN KEY (player_id) REFERENCES Players(player_id));");
+        } catch (SQLException e) {
+            logger.error(Component.text("Error creating table: " + e.getMessage()));
+        }
+    }
+
+    public int GetPlayerBoatColor(Player player) {
+        int playerID = GetPlayerID(player.getName());
+        String query = "SELECT boat_color FROM PlayerConfig WHERE player_id=%i";
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setString(1, String.valueOf(playerID));
+            ResultSet rs = statement.executeQuery(query);
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e){
+            logger.error(Component.text("Error getting player's boat color id: " + e.getMessage()));
+        }
+        return -1;
+    }
+
+    public void SetPlayerBoatColor(Player player, int color) {
+        // to do this, we update the PlayerConfig Table with the relevant value
+        int playerID = GetPlayerID(player.getName());
+        String query = "UPDATE PlayerConfig SET boat_color=? WHERE player_id=?";
+        try(PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setString(1, String.valueOf(color));
+            statement.setString(2, String.valueOf(playerID));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            // Is this enough for error handling? I don't think so.
+            logger.error(Component.text("Error updating player boat color: " + e.getMessage()));
         }
     }
 
@@ -167,7 +209,7 @@ public class DatabaseHandler {
         String query = "SELECT player_id FROM Players WHERE username = ?";
         try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
             statement.setString(1, username);
-            ResultSet rs = statement.executeQuery(query);
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -196,6 +238,7 @@ public class DatabaseHandler {
             logger.error(Component.text("Error when checking Players: " + e.getMessage()));
         }
 
+        // here we insert the user into the Players table
         String UserUUID = String.valueOf(user.getUniqueId());
         String query = "INSERT INTO Players (username, uuid) VALUES (?, ?);";
         // we use this format of createStatement, execute, as we do not expect a return value from the DB.
@@ -207,5 +250,16 @@ public class DatabaseHandler {
             // Is this enough for error handling? I don't think so.
             logger.error(Component.text("Error inserting user: " + e.getMessage()));
         }
-    }
+
+        // and finally we create a record of them in PlayerConfig
+        int playerID = GetPlayerID(user.getName());
+        String PlayerConfigInsertQuery = "INSERT INTO PlayerConfig (player_id, boat_color) VALUES (?, ?);";
+        try(PreparedStatement statement = dbConnection.prepareStatement(PlayerConfigInsertQuery)) {
+            statement.setString(1, String.valueOf(playerID));
+            statement.setString(2, String.valueOf(1));
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            // Is this enough for error handling? I don't think so.
+            logger.error(Component.text("Error inserting user to UserConfig: " + e.getMessage()));
+        }    }
 }

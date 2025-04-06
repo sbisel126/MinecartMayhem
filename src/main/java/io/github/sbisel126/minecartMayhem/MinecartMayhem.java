@@ -1,8 +1,8 @@
 package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
+import io.github.sbisel126.minecartMayhem.commands.JoinRace;
 import io.github.sbisel126.minecartMayhem.commands.MapMenu;
-import io.github.sbisel126.minecartMayhem.commands.StartRace;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -17,7 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.time.Duration;
 import java.util.Objects;
 
 
@@ -25,6 +24,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
     private MiniMessage miniMessage;
     private DatabaseHandler db;
 
+    // hello world!
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -33,9 +33,10 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         ComponentLogger logger = getComponentLogger();
         this.db = new DatabaseHandler(this, logger);
 
+        // register our commands
         Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
-        Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
-        Objects.requireNonNull(getCommand("start_race")).setExecutor(new StartRace(logger, this));
+        Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this, db));
+        Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(logger, this));
 
         ItemHandler itemBoxManager = new ItemHandler(this);
         Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
@@ -47,11 +48,6 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         //logger.info(Component.text("Hello world!"));
     }
 
-    @Override
-    public void onDisable(){
-
-    }
-
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -61,6 +57,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         // send player to hub area
         player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
+        // display Welcome Text
         player.showTitle(Title.title(Component.text("Welcome to"), Component.text("Minecart Mayhem", NamedTextColor.RED)));
     }
 }

@@ -1,5 +1,6 @@
 package io.github.sbisel126.minecartMayhem.commands;
 
+import io.github.sbisel126.minecartMayhem.DatabaseHandler;
 import io.github.sbisel126.minecartMayhem.MinecartHandler;
 import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import net.kyori.adventure.text.Component;
@@ -20,21 +21,21 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartMenu implements Listener, CommandExecutor {
     private final String invName = "Cart Selector";
-    private final Integer red_cart = 11;
-    private final Integer blue_cart = 15;
+    // these define the inventory slots for the Cart Selection menu
+    private static final int Cart_one = 10;
+    private static final int Cart_two = 12;
+    private static final int Cart_three = 14;
+    private static final int Cart_four = 16;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private final ComponentLogger logger;
-    private final MinecartHandler minecartHandler;
+    private final DatabaseHandler db;
 
-    public CartMenu(ComponentLogger logger, MinecartMayhem plugin) {
-        this.logger = logger;
-        this.minecartHandler = new MinecartHandler(plugin);
+    public CartMenu(ComponentLogger logger, MinecartMayhem plugin, DatabaseHandler db) {
+        this.db = db;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("CartMenu initialized."));
     }
@@ -50,18 +51,27 @@ public class CartMenu implements Listener, CommandExecutor {
         }
         Player player = (Player) event.getWhoClicked();
         int slot = event.getSlot();
-
-        if (slot == red_cart) {
-            player.sendMessage("Red Cart selected");
-            minecartHandler.PutPlayerInCart(player, true);
-
-            event.getInventory().close();
-        } else if (slot == blue_cart) {
-            player.sendMessage("Blue Cart selected");
-            minecartHandler.PutPlayerInCart(player, false);
-            event.getInventory().close();
+        switch (slot) {
+            case Cart_one:
+                player.sendMessage("Updated Preference: Cart 1");
+                db.SetPlayerBoatColor(player, 1);
+                break;
+            case Cart_two:
+                player.sendMessage("Updated Preference: Cart 2");
+                db.SetPlayerBoatColor(player, 2);
+                break;
+            case Cart_three:
+                player.sendMessage("Updated Preference: Cart 3");
+                db.SetPlayerBoatColor(player, 3);
+                break;
+            case Cart_four:
+                player.sendMessage("Updated Preference: Cart 4");
+                db.SetPlayerBoatColor(player, 4);
+                break;
+            default:
+                break;
         }
-
+        event.getInventory().close();
         event.setCancelled(true);
     }
 
@@ -74,8 +84,10 @@ public class CartMenu implements Listener, CommandExecutor {
 
         Inventory inv = Bukkit.createInventory(player, InventoryType.CHEST, miniMessage.deserialize(invName));
 
-        inv.setItem(red_cart, getItem(new ItemStack(Material.REDSTONE_BLOCK), "Red Cart", "Click to select", "Race with the Red Cart"));
-        inv.setItem(blue_cart, getItem(new ItemStack(Material.LAPIS_BLOCK), "Blue Cart", "Click to select", "Race with the Blue Cart"));
+        inv.setItem(Cart_one, getItem(new ItemStack(Material.REDSTONE_BLOCK), "1 Cart", "Click to select", "Race with the Red Cart"));
+        inv.setItem(Cart_two, getItem(new ItemStack(Material.LAPIS_BLOCK), "2 Cart", "Click to select", "Race with the Blue Cart"));
+        inv.setItem(Cart_three, getItem(new ItemStack(Material.IRON_BLOCK), "3 Cart", "Click to select", "Race with the Red Cart"));
+        inv.setItem(Cart_four, getItem(new ItemStack(Material.GOLD_BLOCK), "4 Cart", "Click to select", "Race with the Red Cart"));
 
         player.openInventory(inv);
 
