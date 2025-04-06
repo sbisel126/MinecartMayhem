@@ -54,27 +54,10 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         // insert user into User Database
         db.InsertUser(player);
-        // Display text to user
-        Component text = this.miniMessage.deserialize("Plugin <green>MinecartMayhem</green> loaded successfully.<br>" +
-                "   Not an official Minecraft product. <br>" +
-                "   Not approved by or associated with Mojang. <br>");
-        player.sendMessage(text);
 
         // send player to hub area
         player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
-        if(player.isOp()){
-            Component opMessage = this.miniMessage.deserialize("<green>MinecartMayhem</green> detected you are a server <red>operator</red><br>" +
-                            "   Available <red>operator</red> commands are:<br>" +
-                            "   <yellow>ExampleOpCommand1</yellow>: Description of command1<br>" +
-                            "   <yellow>ExampleOpCommand2</yellow>: Description of command2");
-            player.sendMessage(opMessage);
 
-        }else{
-            Component message = this.miniMessage.deserialize("<green>MinecartMayhem</green> "+
-                    "   <yellow>map_menu</yellow>: Opens the map selection user interface.<br>" +
-                    "   <yellow>cart_menu</yellow>: Opens the cart selection user interface.");
-            player.sendMessage(message);
-        }
     }
 }
