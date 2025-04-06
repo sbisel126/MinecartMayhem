@@ -4,8 +4,10 @@ import io.github.sbisel126.minecartMayhem.commands.CartMenu;
 import io.github.sbisel126.minecartMayhem.commands.MapMenu;
 import io.github.sbisel126.minecartMayhem.commands.StartRace;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -15,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Duration;
 import java.util.Objects;
 
 
@@ -28,7 +31,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
 
         this.miniMessage = MiniMessage.miniMessage();
         ComponentLogger logger = getComponentLogger();
-        this.db = new DatabaseHandler(logger);
+        this.db = new DatabaseHandler(this, logger);
 
         Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
@@ -58,6 +61,6 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         // send player to hub area
         player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
-
+        player.showTitle(Title.title(Component.text("Welcome to"), Component.text("Minecart Mayhem", NamedTextColor.RED)));
     }
 }
