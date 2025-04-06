@@ -7,7 +7,7 @@ import java.util.List;
 
 // represents a Race and it's relevant information
 public class RaceHandler {
-    List<RacePlayer> players = new ArrayList<RacePlayer>();
+    List<RacePlayer> players = new ArrayList<>();
     DatabaseHandler db;
     public RaceHandler(DatabaseHandler db) {
         this.db = db;

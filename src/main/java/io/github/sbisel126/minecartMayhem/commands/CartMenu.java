@@ -32,14 +32,10 @@ public class CartMenu implements Listener, CommandExecutor {
     private static final int Cart_three = 14;
     private static final int Cart_four = 16;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private final ComponentLogger logger;
-    private final MinecartHandler minecartHandler;
     private final DatabaseHandler db;
 
     public CartMenu(ComponentLogger logger, MinecartMayhem plugin, DatabaseHandler db) {
         this.db = db;
-        this.logger = logger;
-        this.minecartHandler = new MinecartHandler(plugin);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("CartMenu initialized."));
     }

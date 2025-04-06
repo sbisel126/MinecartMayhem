@@ -8,7 +8,7 @@ public class RacePlayer {
     int CurrentPosition;
     // LastCheckpoint;
     int CurrentLap = 0;
-    int CartColor = 0;
+    int CartColor;
     String Username;
     public RacePlayer(Player player, DatabaseHandler db) {
         // get player's preferred cart color

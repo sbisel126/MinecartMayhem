@@ -18,13 +18,9 @@ import java.util.Date;
 
 public class JoinRace implements Listener, CommandExecutor {
     private Date startTime;
-    private final ComponentLogger logger;
     private RaceHandler race;
-    private JavaPlugin plugin;
 
     public JoinRace(ComponentLogger logger, MinecartMayhem plugin){
-        this.logger = logger;
-        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("StartRace command initialized."));
     }
@@ -33,13 +29,9 @@ public class JoinRace implements Listener, CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can execute this command.");
-            return true;
-        } else if (!player.isInsideVehicle()){
-            sender.sendMessage("You must be in a vehicle to start a race.");
-            return true;
         } else {
             race.AddPlayer(player);
-            return true;
         }
+        return true;
     }
 }
