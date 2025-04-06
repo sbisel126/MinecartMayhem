@@ -1,7 +1,6 @@
 package io.github.sbisel126.minecartMayhem;
 
 // for logging to terminal
-import com.comphenix.protocol.utility.MinecraftFields;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
@@ -15,7 +14,7 @@ public class DatabaseHandler {
     ComponentLogger logger;
     private Connection dbConnection;
     private Boolean connected = false;
-    private MinecartMayhem instance;
+    private final MinecartMayhem instance;
     public DatabaseHandler(MinecartMayhem mm, ComponentLogger logger){
         this.logger = logger;
         this.instance = mm;
