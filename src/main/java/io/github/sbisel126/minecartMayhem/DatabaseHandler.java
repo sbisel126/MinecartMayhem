@@ -6,6 +6,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 
 // awesome documentation of java SQL https://docs.oracle.com/javase/tutorial/jdbc/basics/processingsqlstatements.html
+import java.io.File;
 import java.sql.*;
 
 // begin class
@@ -13,9 +14,10 @@ public class DatabaseHandler {
     ComponentLogger logger;
     private Connection dbConnection;
     private Boolean connected = false;
-
-    public DatabaseHandler(ComponentLogger logger){
+    private final MinecartMayhem instance;
+    public DatabaseHandler(MinecartMayhem mm, ComponentLogger logger){
         this.logger = logger;
+        this.instance = mm;
 
         logger.info(Component.text("We connecting to the db"));
         connect();
@@ -26,7 +28,12 @@ public class DatabaseHandler {
 
     // initializes a connection to the database
     private void connect(){
-        var url = "jdbc:sqlite:./plugins/MinecartMayhem/MM.db";
+        if (!instance.getDataFolder().exists()) {
+            instance.getDataFolder().mkdirs();
+        }
+
+        File dbFile = new File(instance.getDataFolder(), "MM.db");
+        String url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
         if (connected) {
             return;

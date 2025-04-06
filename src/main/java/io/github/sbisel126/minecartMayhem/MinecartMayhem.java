@@ -4,8 +4,10 @@ import io.github.sbisel126.minecartMayhem.commands.CartMenu;
 import io.github.sbisel126.minecartMayhem.commands.MapMenu;
 import io.github.sbisel126.minecartMayhem.commands.StartRace;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -15,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Duration;
 import java.util.Objects;
 
 
@@ -28,7 +31,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
 
         this.miniMessage = MiniMessage.miniMessage();
         ComponentLogger logger = getComponentLogger();
-        this.db = new DatabaseHandler(logger);
+        this.db = new DatabaseHandler(this, logger);
 
         Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this));
@@ -54,27 +57,10 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         // insert user into User Database
         db.InsertUser(player);
-        // Display text to user
-        Component text = this.miniMessage.deserialize("Plugin <green>MinecartMayhem</green> loaded successfully.<br>" +
-                "   Not an official Minecraft product. <br>" +
-                "   Not approved by or associated with Mojang. <br>");
-        player.sendMessage(text);
 
         // send player to hub area
         player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
-        if(player.isOp()){
-            Component opMessage = this.miniMessage.deserialize("<green>MinecartMayhem</green> detected you are a server <red>operator</red><br>" +
-                            "   Available <red>operator</red> commands are:<br>" +
-                            "   <yellow>ExampleOpCommand1</yellow>: Description of command1<br>" +
-                            "   <yellow>ExampleOpCommand2</yellow>: Description of command2");
-            player.sendMessage(opMessage);
-
-        }else{
-            Component message = this.miniMessage.deserialize("<green>MinecartMayhem</green> "+
-                    "   <yellow>map_menu</yellow>: Opens the map selection user interface.<br>" +
-                    "   <yellow>cart_menu</yellow>: Opens the cart selection user interface.");
-            player.sendMessage(message);
-        }
+        player.showTitle(Title.title(Component.text("Welcome to"), Component.text("Minecart Mayhem", NamedTextColor.RED)));
     }
 }
