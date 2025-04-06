@@ -21,8 +21,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.plaf.SplitPaneUI;
 import java.util.ArrayList;
 import java.util.List;
 
