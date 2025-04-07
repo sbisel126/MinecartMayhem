@@ -1,18 +1,26 @@
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+import org.bukkit.Particle;
+import org.bukkit.Color;
+import org.bukkit.Particle.DustOptions;
 
 import java.util.*;
 
@@ -20,6 +28,7 @@ public class ItemHandler implements Listener {
     private final JavaPlugin plugin;
     private final Set<Location> itemBoxLocations = new HashSet<>();
     private final Map<Location, Boolean> activeItemBoxes = new HashMap<>();
+    private final Map<Projectile, Integer> shellBounceCount = new HashMap<>();
 
     public ItemHandler(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -93,6 +102,8 @@ public class ItemHandler implements Listener {
 
     @EventHandler
     public void onPlayerUseGreenShell(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
@@ -106,20 +117,96 @@ public class ItemHandler implements Listener {
 
         event.setCancelled(true);
 
-        Snowball shell = player.launchProjectile(Snowball.class);
+        // Launch low + straight
+        Snowball shell = player.getWorld().spawn(player.getLocation().add(0, 1.2, 0), Snowball.class);
+        shell.setVelocity(player.getLocation().getDirection().setY(0).normalize().multiply(1.2));
         shell.setCustomName("GreenShell");
         shell.setCustomNameVisible(false);
         shell.setShooter(player);
 
+        shellBounceCount.put(shell, 0);
+
+        // Start trail + spin + auto-expire
+        new BukkitRunnable() {
+            int ticksLived = 0;
+
+            @Override
+            public void run() {
+                if (shell.isDead() || !shell.isValid()) {
+                    shellBounceCount.remove(shell);
+                    cancel();
+                    return;
+                }
+
+                // Emit green trail
+                shell.getWorld().spawnParticle(
+                        Particle.DUST,
+                        shell.getLocation(),
+                        2,
+                        0.05, 0.05, 0.05,
+                        0,
+                        new Particle.DustOptions(Color.LIME, 1.0F)
+                );
+
+                // Simulate spin by rotating yaw
+                Location loc = shell.getLocation();
+                loc.setYaw(loc.getYaw() + 20);
+                shell.teleport(loc);
+
+                ticksLived++;
+                if (ticksLived >= 100) {
+                    if (!shell.isDead()) {
+                        shell.remove();
+                        shellBounceCount.remove(shell);
+                        shell.getWorld().playSound(shell.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
+                    }
+                    cancel();
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+
+        // Use up one shell
         item.setAmount(item.getAmount() - 1);
         player.playSound(player.getLocation(), Sound.ENTITY_TURTLE_EGG_CRACK, 1f, 1f);
     }
 
     @EventHandler
-    public void onShellHit(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Snowball)) return;
+    public void onShellHitBlock(ProjectileHitEvent event) {
+        Projectile shell = event.getEntity();
+        if (!"GreenShell".equals(shell.getCustomName())) return;
+        if (!shellBounceCount.containsKey(shell)) return;
+        if (event.getHitEntity() != null) return;
 
-        Snowball shell = (Snowball) event.getDamager();
+        int bounces = shellBounceCount.get(shell);
+        if (bounces >= 2) {
+            shell.remove();
+            shellBounceCount.remove(shell);
+            shell.getWorld().playSound(shell.getLocation(), Sound.ENTITY_ITEM_BREAK, 1f, 1f);
+            return;
+        }
+
+        Vector velocity = shell.getVelocity();
+        BlockFace hitFace = event.getHitBlockFace();
+
+        if (hitFace != null) {
+            switch (hitFace) {
+                case EAST, WEST -> velocity.setX(-velocity.getX());
+                case NORTH, SOUTH -> velocity.setZ(-velocity.getZ());
+                default -> {
+                    return; // don't bounce on UP/DOWN
+                }
+            }
+
+            velocity.setY(0); // keep it on the ground
+            shell.setVelocity(velocity);
+            shellBounceCount.put(shell, bounces + 1);
+            shell.getWorld().playSound(shell.getLocation(), Sound.BLOCK_SLIME_BLOCK_HIT, 0.8f, 1.2f);
+        }
+    }
+
+    @EventHandler
+    public void onShellHitPlayer(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Snowball shell)) return;
         if (!"GreenShell".equals(shell.getCustomName())) return;
         if (!(shell.getShooter() instanceof Player)) return;
 
@@ -128,11 +215,15 @@ public class ItemHandler implements Listener {
         if (event.getEntity() instanceof Player && !event.getEntity().equals(shooter)) {
             event.setDamage(4.0);
             event.getEntity().getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_TURTLE_EGG_BREAK, 1f, 1f);
+            shell.remove();
+            shellBounceCount.remove(shell);
         }
     }
 
     @EventHandler
-    public void onPlaceItemBox(PlayerInteractEvent event) {
+    public void onPlaceOrRemoveItemBox(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
 
@@ -144,14 +235,29 @@ public class ItemHandler implements Listener {
 
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
-        event.setCancelled(true);
-
         Block clicked = event.getClickedBlock();
         if (clicked == null) return;
 
         Location boxLocation = clicked.getLocation().add(0, 1, 0);
-        registerItemBox(boxLocation);
 
+        if (player.isSneaking()) {
+            if (activeItemBoxes.containsKey(boxLocation)) {
+                boxLocation.getBlock().setType(Material.AIR);
+                activeItemBoxes.remove(boxLocation);
+                itemBoxLocations.remove(boxLocation);
+                player.sendMessage(ChatColor.RED + "Item Box removed at " +
+                        boxLocation.getBlockX() + ", " +
+                        boxLocation.getBlockY() + ", " +
+                        boxLocation.getBlockZ());
+                player.playSound(boxLocation, Sound.ENTITY_ITEM_BREAK, 1f, 1.5f);
+            } else {
+                player.sendMessage(ChatColor.GRAY + "No item box found to remove.");
+            }
+            return;
+        }
+
+        event.setCancelled(true);
+        registerItemBox(boxLocation);
         player.sendMessage(ChatColor.GREEN + "Item Box placed at " +
                 boxLocation.getBlockX() + ", " +
                 boxLocation.getBlockY() + ", " +
