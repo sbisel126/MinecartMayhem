@@ -1,0 +1,161 @@
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.*;
+
+public class ItemHandler implements Listener {
+    private final JavaPlugin plugin;
+    private final Set<Location> itemBoxLocations = new HashSet<>();
+    private final Map<Location, Boolean> activeItemBoxes = new HashMap<>();
+
+    public ItemHandler(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void registerItemBox(Location location) {
+        itemBoxLocations.add(location);
+        activeItemBoxes.put(location, true);
+        spawnItemBox(location);
+    }
+
+    private void spawnItemBox(Location location) {
+        location.getBlock().setType(Material.LIGHT_BLUE_SHULKER_BOX);
+    }
+
+    private void removeItemBox(Location location) {
+        location.getBlock().setType(Material.AIR);
+        activeItemBoxes.put(location, false);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                spawnItemBox(location);
+                activeItemBoxes.put(location, true);
+            }
+        }.runTaskLater(plugin, 100L); // 5 seconds
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+
+        if (!(player.getVehicle() instanceof Boat)) return;
+
+        Location playerLoc = player.getLocation();
+        for (Location boxLoc : itemBoxLocations) {
+            if (!boxLoc.getWorld().equals(playerLoc.getWorld())) continue;
+
+            if (activeItemBoxes.getOrDefault(boxLoc, false) &&
+                    playerLoc.distanceSquared(boxLoc) < 2.25) {
+                giveRandomItem(player);
+                removeItemBox(boxLoc);
+                break;
+            }
+        }
+    }
+
+    private void giveRandomItem(Player player) {
+        List<ItemStack> powerUps = Arrays.asList(
+                createItem(Material.FEATHER, "Speed Boost"),
+                createItem(Material.SNOWBALL, "Ice Ball"),
+                createItem(Material.TURTLE_EGG, "Green Shell"),
+                createItem(Material.FIRE_CHARGE, "Fireball"),
+                createItem(Material.SHIELD, "Temporary Shield")
+        );
+
+        ItemStack randomItem = powerUps.get(new Random().nextInt(powerUps.size()));
+        player.getInventory().addItem(randomItem);
+        player.sendMessage(ChatColor.GOLD + "You got a " + ChatColor.stripColor(randomItem.getItemMeta().getDisplayName()) + "!");
+    }
+
+    private ItemStack createItem(Material material, String name) {
+        ItemStack item = new ItemStack(material, 1);
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(ChatColor.AQUA + name);
+            item.setItemMeta(meta);
+        }
+        return item;
+    }
+
+    @EventHandler
+    public void onPlayerUseGreenShell(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItem();
+
+        if (item == null || item.getType() != Material.TURTLE_EGG) return;
+        if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return;
+
+        String displayName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+        if (!displayName.equalsIgnoreCase("Green Shell")) return;
+
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        event.setCancelled(true);
+
+        Snowball shell = player.launchProjectile(Snowball.class);
+        shell.setCustomName("GreenShell");
+        shell.setCustomNameVisible(false);
+        shell.setShooter(player);
+
+        item.setAmount(item.getAmount() - 1);
+        player.playSound(player.getLocation(), Sound.ENTITY_TURTLE_EGG_CRACK, 1f, 1f);
+    }
+
+    @EventHandler
+    public void onShellHit(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Snowball)) return;
+
+        Snowball shell = (Snowball) event.getDamager();
+        if (!"GreenShell".equals(shell.getCustomName())) return;
+        if (!(shell.getShooter() instanceof Player)) return;
+
+        Player shooter = (Player) shell.getShooter();
+
+        if (event.getEntity() instanceof Player && !event.getEntity().equals(shooter)) {
+            event.setDamage(4.0);
+            event.getEntity().getWorld().playSound(event.getEntity().getLocation(), Sound.ENTITY_TURTLE_EGG_BREAK, 1f, 1f);
+        }
+    }
+
+    @EventHandler
+    public void onPlaceItemBox(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItem();
+
+        if (item == null || item.getType() != Material.STICK) return;
+        if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return;
+
+        String displayName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+        if (!displayName.equalsIgnoreCase("Item Box Wand")) return;
+
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        event.setCancelled(true);
+
+        Block clicked = event.getClickedBlock();
+        if (clicked == null) return;
+
+        Location boxLocation = clicked.getLocation().add(0, 1, 0);
+        registerItemBox(boxLocation);
+
+        player.sendMessage(ChatColor.GREEN + "Item Box placed at " +
+                boxLocation.getBlockX() + ", " +
+                boxLocation.getBlockY() + ", " +
+                boxLocation.getBlockZ());
+        player.playSound(boxLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
+    }
+}
