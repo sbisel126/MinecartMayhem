@@ -10,7 +10,7 @@ commands:
     permission: map_menu
     permission-message: You do not have permission to open the map menu.
   cart_menu:
-    description: Opens the cart election menu.
+    description: Opens the cart selection menu.
     usage: /cart_menu
     aliases: cart
     permission: cart_menu
