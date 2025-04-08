@@ -2,6 +2,7 @@ package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
+import io.github.sbisel126.minecartMayhem.commands.JoinRace;
 import io.github.sbisel126.minecartMayhem.commands.TeleportMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
