@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
+import java.util.List;
 
 
 public class JoinRace implements Listener, CommandExecutor {
@@ -22,7 +23,7 @@ public class JoinRace implements Listener, CommandExecutor {
 
     public JoinRace(ComponentLogger logger, MinecartMayhem plugin){
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        logger.info(Component.text("StartRace command initialized."));
+        logger.info(Component.text("JoinRace command initialized."));
     }
 
     @Override
