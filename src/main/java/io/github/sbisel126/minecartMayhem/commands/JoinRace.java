@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JoinRace implements Listener, CommandExecutor {
-    private final String invName = "Map Selector";
+    private final String invName = "Race Selector";
     private final Integer grass_map = 11;
     private final Integer sand_map = 15;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
