@@ -21,3 +21,9 @@ commands:
     aliases: race
     permission: join_race
     permission-message: You do not have permission to join a race.
+  debug_command:
+    description: debug
+    usage: /debug_command
+    aliases: debug
+    permission: debug
+    permission-message: no.

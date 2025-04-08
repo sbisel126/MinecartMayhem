@@ -2,6 +2,7 @@ package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
+import io.github.sbisel126.minecartMayhem.commands.DebugCommand;
 import io.github.sbisel126.minecartMayhem.commands.JoinRace;
 import io.github.sbisel126.minecartMayhem.commands.TeleportMenu;
 import net.kyori.adventure.text.Component;
@@ -41,6 +42,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Objects.requireNonNull(getCommand("teleport_menu")).setExecutor(new TeleportMenu(this));
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(this));
         Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(this));
+        Objects.requireNonNull(getCommand("debug_command")).setExecutor(new DebugCommand(this));
 
         ItemHandler itemBoxManager = new ItemHandler(this);
         Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
