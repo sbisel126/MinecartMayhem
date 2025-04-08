@@ -30,15 +30,15 @@ public class MinecartHandler {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    public void PutPlayerInCart(Player player, boolean cartType) {
+    public void PutPlayerInCart(Player player, int cartType) {
         Location loc = player.getLocation();
-        Boat boat;
-        // Create a boat at the player's location
-        if (cartType) {
-            boat = (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
-        } else {
-            boat = (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
-        }
+
+        var boat = switch (cartType) {
+            case 2 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
+            case 3 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
+            case 4 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.OAK_BOAT);
+            default -> (Boat) player.getWorld().spawnEntity(loc, EntityType.SPRUCE_BOAT);
+        };
 
         // Make the player ride the boat
         boat.addPassenger(player);
