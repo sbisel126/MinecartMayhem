@@ -23,24 +23,24 @@ import java.util.Objects;
 
 
 public class MinecartMayhem extends JavaPlugin implements Listener {
-    private MiniMessage miniMessage;
-    private DatabaseHandler db;
+    public MiniMessage miniMessage;
+    public DatabaseHandler db;
     public RaceHandler GrassRace;
     public RaceHandler SandRace;
-
+    public ComponentLogger PluginLogger;
     // hello world!
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, this);
 
         this.miniMessage = MiniMessage.miniMessage();
-        ComponentLogger logger = getComponentLogger();
-        this.db = new DatabaseHandler(this, logger);
+        this.PluginLogger = getComponentLogger();
+        this.db = new DatabaseHandler(this);
 
         // register our commands
-        Objects.requireNonNull(getCommand("teleport_menu")).setExecutor(new TeleportMenu(logger, this));
-        Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this, db));
-        Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(logger, this));
+        Objects.requireNonNull(getCommand("teleport_menu")).setExecutor(new TeleportMenu(this));
+        Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(this));
+        Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(this));
 
         ItemHandler itemBoxManager = new ItemHandler(this);
         Bukkit.getPluginManager().registerEvents(itemBoxManager, this);

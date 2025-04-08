@@ -15,8 +15,8 @@ public class DatabaseHandler {
     private Connection dbConnection;
     private Boolean connected = false;
     private final MinecartMayhem instance;
-    public DatabaseHandler(MinecartMayhem mm, ComponentLogger logger){
-        this.logger = logger;
+    public DatabaseHandler(MinecartMayhem mm){
+        this.logger = mm.PluginLogger;
         this.instance = mm;
 
         logger.info(Component.text("We connecting to the db"));

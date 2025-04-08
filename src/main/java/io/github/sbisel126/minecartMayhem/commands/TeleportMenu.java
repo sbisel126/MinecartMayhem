@@ -28,10 +28,9 @@ public class TeleportMenu implements Listener, CommandExecutor {
     private final Integer grass_map = 11;
     private final Integer sand_map = 15;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private final ComponentLogger logger;
 
-    public TeleportMenu(ComponentLogger logger, MinecartMayhem plugin) {
-        this.logger = logger;
+    public TeleportMenu(MinecartMayhem plugin) {
+        ComponentLogger logger = plugin.PluginLogger;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("TeleportMenu initialized."));
     }

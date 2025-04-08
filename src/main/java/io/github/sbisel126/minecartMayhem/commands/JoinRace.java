@@ -31,8 +31,8 @@ public class JoinRace implements Listener, CommandExecutor {
     private final ComponentLogger logger;
     private MinecartMayhem plugin;
 
-    public JoinRace(ComponentLogger logger, MinecartMayhem plugin) {
-        this.logger = logger;
+    public JoinRace(MinecartMayhem plugin) {
+        this.logger = plugin.PluginLogger;
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("JoinRace initialized."));

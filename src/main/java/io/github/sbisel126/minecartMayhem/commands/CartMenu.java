@@ -34,8 +34,9 @@ public class CartMenu implements Listener, CommandExecutor {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final DatabaseHandler db;
 
-    public CartMenu(ComponentLogger logger, MinecartMayhem plugin, DatabaseHandler db) {
-        this.db = db;
+    public CartMenu(MinecartMayhem plugin) {
+        this.db = plugin.db;
+        ComponentLogger logger = plugin.PluginLogger;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("CartMenu initialized."));
     }
