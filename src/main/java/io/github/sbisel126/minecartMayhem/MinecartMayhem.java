@@ -3,7 +3,7 @@ package io.github.sbisel126.minecartMayhem;
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
 import io.github.sbisel126.minecartMayhem.commands.JoinRace;
-import io.github.sbisel126.minecartMayhem.commands.MapMenu;
+import io.github.sbisel126.minecartMayhem.commands.TeleportMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -38,7 +38,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         this.db = new DatabaseHandler(this, logger);
 
         // register our commands
-        Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
+        Objects.requireNonNull(getCommand("teleport_menu")).setExecutor(new TeleportMenu(logger, this));
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this, db));
         Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(logger, this));
 
