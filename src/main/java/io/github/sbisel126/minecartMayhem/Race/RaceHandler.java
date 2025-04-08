@@ -7,6 +7,7 @@ import java.util.List;
 
 // represents a Race and it's relevant information
 public class RaceHandler {
+
     List<RacePlayer> players = new ArrayList<>();
     DatabaseHandler db;
     public RaceHandler(DatabaseHandler db) {
@@ -18,6 +19,7 @@ public class RaceHandler {
     public void AddPlayer(Player player) {
         var NewRacePlayer = new RacePlayer(player, this.db);
         this.players.add(NewRacePlayer);
+
     }
 
     // removes player from the Race Object.
