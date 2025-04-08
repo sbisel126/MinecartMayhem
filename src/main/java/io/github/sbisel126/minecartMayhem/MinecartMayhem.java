@@ -10,6 +10,7 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -51,7 +52,6 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         //Crank up some instances of Race that players will be able to subscribe to
         this.GrassRace = new RaceHandler(this.db);
         this.SandRace = new RaceHandler(this.db);
-
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -59,6 +59,9 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Player player = event.getPlayer();
         // insert user into User Database
         db.InsertUser(player);
+
+        // set them to adventure mode
+        player.setGameMode(GameMode.ADVENTURE);
 
         // send player to hub area
         player.teleport(new Location(player.getWorld(), -24, -60, 574));
