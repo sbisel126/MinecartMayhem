@@ -2,7 +2,6 @@ package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
-import io.github.sbisel126.minecartMayhem.commands.JoinRace;
 import io.github.sbisel126.minecartMayhem.commands.TeleportMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,8 +24,8 @@ import java.util.Objects;
 public class MinecartMayhem extends JavaPlugin implements Listener {
     private MiniMessage miniMessage;
     private DatabaseHandler db;
-    private RaceHandler GrassRace;
-    private RaceHandler SandRace;
+    public RaceHandler GrassRace;
+    public RaceHandler SandRace;
 
     // hello world!
     @Override
