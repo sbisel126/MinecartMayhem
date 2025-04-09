@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -28,11 +27,10 @@ public class JoinRace implements Listener, CommandExecutor {
     private final Integer grass_map = 11;
     private final Integer sand_map = 15;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private final ComponentLogger logger;
-    private MinecartMayhem plugin;
+    private final MinecartMayhem plugin;
 
     public JoinRace(MinecartMayhem plugin) {
-        this.logger = plugin.PluginLogger;
+        ComponentLogger logger = plugin.PluginLogger;
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         logger.info(Component.text("JoinRace initialized."));
@@ -51,11 +49,11 @@ public class JoinRace implements Listener, CommandExecutor {
 
         if (slot == grass_map) {
             player.sendMessage("Joining Grass Map");
-            plugin.GrassRace.AddPlayer(player);
+            plugin.GrassRaceQueue.AddPlayer(player);
             event.getInventory().close();
         } else if (slot == sand_map) {
             player.sendMessage("Sand Map selected");
-            plugin.SandRace.AddPlayer(player);
+            plugin.SandRaceQueue.AddPlayer(player);
             event.getInventory().close();
         }
 

@@ -1,6 +1,7 @@
 package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
+import io.github.sbisel126.minecartMayhem.Race.RaceQueue;
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
 import io.github.sbisel126.minecartMayhem.commands.DebugCommand;
 import io.github.sbisel126.minecartMayhem.commands.JoinRace;
@@ -28,6 +29,8 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
     public DatabaseHandler db;
     public RaceHandler GrassRace;
     public RaceHandler SandRace;
+    public RaceQueue GrassRaceQueue;
+    public RaceQueue SandRaceQueue;
     public ComponentLogger PluginLogger;
     // hello world!
     @Override
@@ -51,9 +54,14 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 100, 65, 200));
         itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 150, 65, 250));
 
-        //Crank up some instances of Race that players will be able to subscribe to
+        //Crank up some instances of Race for our RaceQueues
         this.GrassRace = new RaceHandler(this);
         this.SandRace = new RaceHandler(this);
+
+        // and here we make the queues that handle assigning players to the races
+        this.GrassRaceQueue = new RaceQueue(this, GrassRace);
+        this.SandRaceQueue = new RaceQueue(this, SandRace);
+
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
