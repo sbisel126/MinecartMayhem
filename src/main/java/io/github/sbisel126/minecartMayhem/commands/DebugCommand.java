@@ -31,33 +31,7 @@ public class DebugCommand implements Listener, CommandExecutor {
             sender.sendMessage("Only players can execute this command.");
             return true;
         }
-
-        displayRaceStartGraphic(player);
+        sender.sendMessage(Component.text("wow"));
         return true;
-    }
-
-    private void displayRaceStartGraphic(Player player) {
-        // Play the first sound immediately
-        player.showTitle(Title.title(Component.text("3", NamedTextColor.RED),Component.text("")));
-        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1F, 0.67F);
-
-        // After 1 second (20 ticks)
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.showTitle(Title.title(Component.text("2", NamedTextColor.RED),Component.text("")));
-            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 0.67F);
-        }, 20L);
-
-        // After 2 seconds (40 ticks)
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.showTitle(Title.title(Component.text("1", NamedTextColor.RED),Component.text("")));
-            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 0.67F);
-        }, 40L);
-
-        // After 3 seconds (60 ticks) – start the race
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.showTitle(Title.title(Component.text("Go!", NamedTextColor.GREEN),Component.text("")));
-            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1.33F);
-            player.sendMessage("Race started!");
-        }, 60L);
     }
 }
