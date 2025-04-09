@@ -36,6 +36,7 @@ public class RaceQueue {
     public void StartChecks() {
         if (active) return; // already running
         active = true;
+        // sets the time after 2+ players join a race until race starts
         countdownSeconds = 60;
 
         // not enough players, reset countdown
@@ -59,16 +60,24 @@ public class RaceQueue {
                     // timer complete! Send players off to the races here.
                     StopChecks();
                     for (Player player : playersInQueue) {
+                        player.sendMessage("Race start!");
                         race.AddPlayer(player);
                     }
                     cancel();
                     return;
                 }
 
-                // optionally notify players of the countdown
-                for (Player p : playersInQueue) {
-                    p.sendMessage("Race starting in " + countdownSeconds + " seconds...");
+                // notify players of the countdown
+                if(countdownSeconds == 15 ||countdownSeconds == 30 || countdownSeconds == 60) {
+                    for (Player p : playersInQueue) {
+                        p.sendMessage("Race starting in " + countdownSeconds + " seconds...");
+                    }
+                } else if (countdownSeconds <= 5) {
+                    for (Player p : playersInQueue) {
+                        p.sendMessage("Race starting in " + countdownSeconds + " seconds...");
+                    }
                 }
+
 
                 countdownSeconds--;
             }
