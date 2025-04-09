@@ -43,7 +43,12 @@ public class RaceHandler {
                 displayRaceStartGraphic(racePlayer);
             }
         }
-        //unfreeze players
+        //unfreeze boats
+        for (RacePlayer racePlayer : players) {
+            if (racePlayer != null) {
+                racePlayer.minecart.setFrozenBoat(false);
+            }
+        }
         //start timer
     }
 

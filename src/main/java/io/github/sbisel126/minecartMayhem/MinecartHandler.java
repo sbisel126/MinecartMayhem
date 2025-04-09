@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
+import io.github.sbisel126.minecartMayhem.Race.RacePlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
@@ -24,13 +25,15 @@ public class MinecartHandler {
     private JavaPlugin plugin;
     private ProtocolManager protocolManager;
     private final Map<Player, Integer> movementState = new HashMap<>();
+    private boolean frozenBoat = false;
 
     public MinecartHandler(JavaPlugin plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    public void PutPlayerInCart(Player player, int cartType) {
+    public void PutPlayerInCart(RacePlayer RP, int cartType) {
+        Player player = RP.GetPlayer();
         Location loc = player.getLocation();
 
         var boat = switch (cartType) {
@@ -42,12 +45,13 @@ public class MinecartHandler {
 
         // Make the player ride the boat
         boat.addPassenger(player);
-
-        startBoatControl(player, boat);
+        // start boat in frozen state
+        frozenBoat = true;
+        startBoatControl(RP, boat);
     }
 
-
-    private void startBoatControl(Player player, Boat boat) {
+    private void startBoatControl(RacePlayer RP, Boat boat) {
+        Player player = RP.GetPlayer();
         // Add this map to track when the boat is climbing
         final Map<Player, Boolean> isClimbing = new HashMap<>();
 
@@ -125,6 +129,13 @@ public class MinecartHandler {
                     return;
                 }
 
+                if (frozenBoat) {
+                    // If the boat is frozen, set boat velocity to zero
+                    boat.setVelocity(new Vector(0, 0, 0));
+                    //player.teleport(new Location(player.getWorld(), RP.StartX, RP.StartY, RP.StartZ));
+                    return;
+                }
+
                 int state = movementState.getOrDefault(player, 0);
                 boolean climbing = isClimbing.getOrDefault(player, false);
 
@@ -166,4 +177,12 @@ public class MinecartHandler {
             }
         }.runTaskTimer(plugin, 0L, 1L); // Runs every tick (20 ticks per second)
     }
+
+    public boolean isFrozenBoat() {
+        return frozenBoat;
     }
+
+    public void setFrozenBoat(boolean frozenBoat) {
+        this.frozenBoat = frozenBoat;
+    }
+}

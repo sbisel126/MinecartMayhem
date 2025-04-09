@@ -5,7 +5,6 @@ import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,17 +44,19 @@ public class RaceQueue {
             int BaseX = 262;
             int BaseY = -59;
             int BaseZ = -52;
-            player.teleport(new Location(player.getWorld(), BaseX + (2*(1+PlayerID)), BaseY, BaseZ, -175, 5));
+            NewRP.SetStartPos(BaseX + (2*(1+PlayerID)), BaseY, BaseZ);
+            NewRP.player.teleport(new Location(player.getWorld(), BaseX + (2*(1+PlayerID)), BaseY, BaseZ, -175, 5));
         }
         MinecartHandler MinecartHandler = new MinecartHandler(plugin);
-        MinecartHandler.PutPlayerInCart(player, NewRP.CartColor);
+        MinecartHandler.PutPlayerInCart(NewRP, NewRP.CartColor);
+        NewRP.setMinecart(MinecartHandler);
     }
 
     public void StartChecks() {
         if (active) return; // already running
         active = true;
         // sets the time after 2+ players join a race until race starts
-        countdownSeconds = 60;
+        countdownSeconds = 15;
 
         // not enough players, reset countdown
         // timer complete! Send players off to the races here.
@@ -79,7 +80,7 @@ public class RaceQueue {
 
                 // not enough players, reset countdown
                 if (playercount < 2) {
-                    countdownSeconds = 60;
+                    countdownSeconds = 15;
                     return;
                 }
 
@@ -90,8 +91,6 @@ public class RaceQueue {
                         if(p == null) {
                             continue;
                         }
-
-                        p.player.sendMessage("Race start!");
                         race.AddPlayers(playersInQueue);
                     }
                     cancel();
