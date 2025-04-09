@@ -5,9 +5,6 @@ import org.bukkit.entity.Player;
 
 // represents Player information within a race
 public class RacePlayer {
-    int CurrentPosition;
-    // LastCheckpoint;
-    int CurrentLap = 0;
     int CartColor;
     Player player;
     String Username;
