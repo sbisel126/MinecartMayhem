@@ -55,13 +55,12 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         itemBoxManager.registerItemBox(new Location(Bukkit.getWorld("world"), 150, 65, 250));
 
         //Crank up some instances of Race for our RaceQueues
-        this.GrassRace = new RaceHandler(this);
-        this.SandRace = new RaceHandler(this);
+        this.GrassRace = new RaceHandler(this, "grass");
+        this.SandRace = new RaceHandler(this, "sand");
 
         // and here we make the queues that handle assigning players to the races
-        this.GrassRaceQueue = new RaceQueue(this, GrassRace);
-        this.SandRaceQueue = new RaceQueue(this, SandRace);
-
+        this.GrassRaceQueue = new RaceQueue(this, GrassRace, "grass");
+        this.SandRaceQueue = new RaceQueue(this, SandRace, "sand");
     }
 
     @EventHandler(priority = EventPriority.NORMAL)

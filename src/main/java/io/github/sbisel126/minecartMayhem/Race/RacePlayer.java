@@ -9,11 +9,13 @@ public class RacePlayer {
     // LastCheckpoint;
     int CurrentLap = 0;
     int CartColor;
+    Player player;
     String Username;
     public RacePlayer(Player player, DatabaseHandler db) {
         // get player's preferred cart color
         this.CartColor = db.GetPlayerBoatColor(player);
         this.Username = player.getName();
+        this.player = player;
     }
 
     public String GetUsername() {
