@@ -1,0 +1,203 @@
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.reflect.StructureModifier;
+import io.github.sbisel126.minecartMayhem.DatabaseHandler;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class MinecartHandler {
+    private final JavaPlugin plugin;
+    private final ProtocolManager protocolManager;
+    private final DatabaseHandler db;
+
+    // Movement state: 1 = forward, -1 = backward, 0 = idle
+    private final Map<Player, Integer> movementState = new HashMap<>();
+
+    // Drift state tracking
+    private final Map<Player, Boolean> isDrifting = new HashMap<>();
+    private final Map<Player, Long> driftStartTime = new HashMap<>();
+
+    public MinecartHandler(JavaPlugin plugin, DatabaseHandler db) {
+        this.plugin = plugin;
+        this.db = db;
+        this.protocolManager = ProtocolLibrary.getProtocolManager();
+    }
+
+    public void PutPlayerInCart(Player player, boolean cartType) {
+        Location loc = player.getLocation();
+
+        Boat boat = (Boat) player.getWorld().spawnEntity(loc, cartType ? EntityType.BIRCH_BOAT : EntityType.ACACIA_BOAT);
+        boat.setSilent(true);
+        boat.setInvulnerable(true);
+        boat.addPassenger(player);
+
+        // Render their selected kart model as an ArmorStand
+        spawnKartModel(player, boat);
+
+        // Begin movement control logic
+        startKartControl(player, boat);
+    }
+
+    private void spawnKartModel(Player player, Boat boat) {
+        int cartChoice = db.GetPlayerBoatColor(player);
+        int modelData = switch (cartChoice) {
+            case 1 -> 123456;
+            case 2 -> 123457;
+            case 3 -> 123458;
+            case 4 -> 123459;
+            default -> 123456;
+        };
+
+        Location loc = boat.getLocation().clone().add(0, -1.7, 0);
+        ArmorStand stand = (ArmorStand) boat.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
+        stand.setInvisible(true);
+        stand.setMarker(true);
+        stand.setGravity(false);
+        stand.setInvulnerable(true);
+        stand.setSilent(true);
+
+        ItemStack modelItem = new ItemStack(Material.CARROT_ON_A_STICK);
+        ItemMeta meta = modelItem.getItemMeta();
+        meta.setCustomModelData(modelData);
+        modelItem.setItemMeta(meta);
+        stand.setHelmet(modelItem);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!boat.isValid() || !stand.isValid()) {
+                    this.cancel();
+                    stand.remove();
+                    return;
+                }
+                stand.teleport(boat.getLocation().clone().add(0, -1.7, 0));
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    private void startKartControl(Player player, Boat boat) {
+        Map<Player, Boolean> isClimbing = new HashMap<>();
+
+        // Handle steering + drift input
+        protocolManager.addPacketListener(new PacketAdapter(plugin, PacketType.Play.Client.STEER_VEHICLE) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                if (event.getPlayer() != player) return;
+
+                PacketContainer packet = event.getPacket();
+                StructureModifier<Boolean> booleans = packet.getBooleans();
+
+                boolean forward = booleans.read(0);
+                boolean backward = booleans.read(1);
+                boolean jumping = booleans.read(2); // Left Ctrl (used as drift)
+
+                // Detect drift start
+                if (jumping && !isDrifting.getOrDefault(player, false)) {
+                    isDrifting.put(player, true);
+                    driftStartTime.put(player, System.currentTimeMillis());
+                }
+
+                // Detect drift release
+                if (!jumping && isDrifting.getOrDefault(player, false)) {
+                    isDrifting.put(player, false);
+                    long driftDuration = System.currentTimeMillis() - driftStartTime.getOrDefault(player, 0L);
+                    if (driftDuration >= 1000) {
+                        // Apply boost after drifting for at least 1 second
+                        Vector boost = player.getLocation().getDirection().normalize().multiply(2.5);
+                        boat.setVelocity(boost);
+                        player.sendMessage("§bDrift boost!");
+                    }
+                }
+
+                if (forward) {
+                    movementState.put(player, 1);
+                    Vector direction = player.getLocation().getDirection().normalize();
+                    Location front = boat.getLocation().clone().add(direction.multiply(1.2));
+                    front.setY(boat.getLocation().getY());
+
+                    boolean climb = false;
+                    Material blockType = front.getBlock().getType();
+
+                    if (!front.getBlock().isPassable()) {
+                        Location above = front.clone().add(0, 1, 0);
+                        if (above.getBlock().isPassable()) climb = true;
+                    }
+
+                    if (blockType.name().contains("STAIRS") || blockType.name().contains("SLAB")) {
+                        climb = true;
+                    }
+                    if (blockType.name().contains("WOOL")) {
+                        climb = false;
+                    }
+
+                    isClimbing.put(player, climb);
+                } else if (backward) {
+                    movementState.put(player, -1);
+                    isClimbing.put(player, false);
+                } else {
+                    movementState.put(player, 0);
+                    isClimbing.put(player, false);
+                }
+            }
+        });
+
+        // Apply motion every tick
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (boat.isDead() || !player.isInsideVehicle() || !(player.getVehicle() instanceof Boat)) {
+                    this.cancel();
+                    movementState.remove(player);
+                    isClimbing.remove(player);
+                    boat.remove();
+                    player.teleport(new Location(player.getWorld(), -24, -60, 574)); // hub
+                    return;
+                }
+
+                int state = movementState.getOrDefault(player, 0);
+                boolean climbing = isClimbing.getOrDefault(player, false);
+
+                // Gravity handling
+                if (!boat.isOnGround() && !climbing) {
+                    Vector vel = boat.getVelocity();
+                    vel.setY(vel.getY() - 0.15);
+                    if (vel.getY() < -1.0) vel.setY(-1.0);
+                    boat.setVelocity(vel);
+                }
+
+                // Movement
+                Vector dir = boat.getLocation().getDirection().normalize();
+                if (state == 1) {
+                    if (climbing && boat.getVelocity().getY() < 0.5) {
+                        boat.setVelocity(dir.multiply(1.0).setY(0.4));
+                    } else {
+                        boat.setVelocity(dir.multiply(1.5));
+                    }
+                } else if (state == -1) {
+                    dir.setX(-dir.getX());
+                    dir.setZ(-dir.getZ());
+                    boat.setVelocity(dir.multiply(1.1));
+                } else {
+                    boat.setVelocity(boat.getVelocity().multiply(0.8));
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+    }
+}
