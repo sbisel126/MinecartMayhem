@@ -1,20 +1,19 @@
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
-import io.github.sbisel126.minecartMayhem.DatabaseHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -27,12 +26,10 @@ public class MinecartHandler {
     private final ProtocolManager protocolManager;
     private final DatabaseHandler db;
 
-    // Movement state: 1 = forward, -1 = backward, 0 = idle
     private final Map<Player, Integer> movementState = new HashMap<>();
-
-    // Drift state tracking
     private final Map<Player, Boolean> isDrifting = new HashMap<>();
     private final Map<Player, Long> driftStartTime = new HashMap<>();
+    private final Map<Player, Float> turnState = new HashMap<>();
 
     public MinecartHandler(JavaPlugin plugin, DatabaseHandler db) {
         this.plugin = plugin;
@@ -40,22 +37,23 @@ public class MinecartHandler {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    public void PutPlayerInCart(Player player, boolean cartType) {
+    public void PutPlayerInCart(Player player, boolean useBirchBoat) {
+        plugin.getLogger().info(">> PutPlayerInCart called for " + player.getName());
         Location loc = player.getLocation();
-
-        Boat boat = (Boat) player.getWorld().spawnEntity(loc, cartType ? EntityType.BIRCH_BOAT : EntityType.ACACIA_BOAT);
+        Boat boat = (Boat) player.getWorld().spawnEntity(loc, useBirchBoat ? EntityType.BIRCH_BOAT : EntityType.ACACIA_BOAT);
         boat.setSilent(true);
         boat.setInvulnerable(true);
         boat.addPassenger(player);
+        boat.setGravity(false); // Disable gravity to help simulate control
+        Bukkit.getLogger().info("Passengers after spawn: " + boat.getPassengers());
 
-        // Render their selected kart model as an ArmorStand
         spawnKartModel(player, boat);
 
-        // Begin movement control logic
-        startKartControl(player, boat);
+
     }
 
     private void spawnKartModel(Player player, Boat boat) {
+
         int cartChoice = db.GetPlayerBoatColor(player);
         int modelData = switch (cartChoice) {
             case 1 -> 123456;
@@ -69,14 +67,16 @@ public class MinecartHandler {
         ArmorStand stand = (ArmorStand) boat.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
         stand.setInvisible(true);
         stand.setMarker(true);
-        stand.setGravity(false);
+        stand.setGravity(true);
         stand.setInvulnerable(true);
         stand.setSilent(true);
 
         ItemStack modelItem = new ItemStack(Material.CARROT_ON_A_STICK);
         ItemMeta meta = modelItem.getItemMeta();
-        meta.setCustomModelData(modelData);
-        modelItem.setItemMeta(meta);
+        if (meta != null) {
+            meta.setCustomModelData(modelData);
+            modelItem.setItemMeta(meta);
+        }
         stand.setHelmet(modelItem);
 
         new BukkitRunnable() {
@@ -90,75 +90,112 @@ public class MinecartHandler {
                 stand.teleport(boat.getLocation().clone().add(0, -1.7, 0));
             }
         }.runTaskTimer(plugin, 0L, 1L);
+        startKartControl(player, boat);
     }
 
     private void startKartControl(Player player, Boat boat) {
         Map<Player, Boolean> isClimbing = new HashMap<>();
 
-        // Handle steering + drift input
-        protocolManager.addPacketListener(new PacketAdapter(plugin, PacketType.Play.Client.STEER_VEHICLE) {
+        protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 if (event.getPlayer() != player) return;
 
+                Bukkit.getLogger().info("📥 Packet received from: " + event.getPlayer().getName());
+
+                if (event.getPlayer().getVehicle() == null) {
+                    Bukkit.getLogger().warning("🚫 Player is not in a vehicle!");
+                } else {
+                    Bukkit.getLogger().info("✅ Player vehicle type: " + event.getPlayer().getVehicle().getType());
+                }
+
                 PacketContainer packet = event.getPacket();
-                StructureModifier<Boolean> booleans = packet.getBooleans();
+                StructureModifier<Boolean> booleans = packet.getStructures().read(0).getBooleans();
+                StructureModifier<Float> floats = packet.getFloat();
+
+                Boolean driftingObj = booleans.readSafely(2);
+                Float sideways = floats.readSafely(0);
+
+                if (booleans == null) return;
 
                 boolean forward = booleans.read(0);
                 boolean backward = booleans.read(1);
-                boolean jumping = booleans.read(2); // Left Ctrl (used as drift)
+                boolean drifting = driftingObj != null && driftingObj;
+                if (forward) {
+                    movementState.put(player, 1); // Mark as moving forward
 
-                // Detect drift start
-                if (jumping && !isDrifting.getOrDefault(player, false)) {
+                    // More precise obstacle detection
+                    Vector direction = player.getLocation().getDirection().normalize();
+                    Location boatLoc = boat.getLocation();
+
+                    // Check if there's a block at the front lower part of the boat
+                    Location frontLoc = boatLoc.clone().add(direction.clone().multiply(1.2));
+                    frontLoc.setY(boatLoc.getY()); // Check at boat level
+
+                    // Check if there's a block in front that the boat needs to climb
+                    boolean needsToClimb = false;
+
+                    // Check if there's a solid block in front
+                    if (!frontLoc.getBlock().isPassable()) {
+                        // Check if there's space above for the boat to climb to
+                        Location aboveFrontLoc = frontLoc.clone().add(0, 1, 0);
+                        if (aboveFrontLoc.getBlock().isPassable()) {
+                            needsToClimb = true;
+                        }
+                    }
+
+                    // Also check specifically for stairs and slabs
+                    Material frontBlockType = frontLoc.getBlock().getType();
+                    if (frontBlockType.name().contains("STAIRS") ||
+                            frontBlockType.name().contains("SLAB") ||
+                            frontBlockType.name().contains("STEP")) {
+                        needsToClimb = true;
+                    }
+                    if (frontBlockType.name().contains("WOOL")) {
+                        needsToClimb = false;
+                    }
+
+                    isClimbing.put(player, needsToClimb);
+
+                } else if (backward) {
+                    movementState.put(player, -1); // Backward movement
+                    isClimbing.put(player, false);
+                } else {
+                    movementState.put(player, 0); // No movement
+                    isClimbing.put(player, false);
+
+
+                    Bukkit.getLogger().info("➡ Packet -> Forward: " + forward + ", Backward: " + backward + ", Drift: " + drifting + ", Sideways: " + sideways);
+                }
+                if (drifting && !isDrifting.getOrDefault(player, false)) {
                     isDrifting.put(player, true);
                     driftStartTime.put(player, System.currentTimeMillis());
                 }
 
-                // Detect drift release
-                if (!jumping && isDrifting.getOrDefault(player, false)) {
+                if (!drifting && isDrifting.getOrDefault(player, false)) {
                     isDrifting.put(player, false);
-                    long driftDuration = System.currentTimeMillis() - driftStartTime.getOrDefault(player, 0L);
-                    if (driftDuration >= 1000) {
-                        // Apply boost after drifting for at least 1 second
+                    long driftTime = System.currentTimeMillis() - driftStartTime.getOrDefault(player, 0L);
+                    if (driftTime >= 1000) {
                         Vector boost = player.getLocation().getDirection().normalize().multiply(2.5);
                         boat.setVelocity(boost);
-                        player.sendMessage("§bDrift boost!");
+                        player.sendMessage(ChatColor.AQUA + "Drift Boost!");
                     }
+                }
+
+                if (sideways != null) {
+                    turnState.put(player, sideways);
                 }
 
                 if (forward) {
                     movementState.put(player, 1);
-                    Vector direction = player.getLocation().getDirection().normalize();
-                    Location front = boat.getLocation().clone().add(direction.multiply(1.2));
-                    front.setY(boat.getLocation().getY());
-
-                    boolean climb = false;
-                    Material blockType = front.getBlock().getType();
-
-                    if (!front.getBlock().isPassable()) {
-                        Location above = front.clone().add(0, 1, 0);
-                        if (above.getBlock().isPassable()) climb = true;
-                    }
-
-                    if (blockType.name().contains("STAIRS") || blockType.name().contains("SLAB")) {
-                        climb = true;
-                    }
-                    if (blockType.name().contains("WOOL")) {
-                        climb = false;
-                    }
-
-                    isClimbing.put(player, climb);
                 } else if (backward) {
                     movementState.put(player, -1);
-                    isClimbing.put(player, false);
                 } else {
                     movementState.put(player, 0);
-                    isClimbing.put(player, false);
                 }
             }
         });
 
-        // Apply motion every tick
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -166,37 +203,65 @@ public class MinecartHandler {
                     this.cancel();
                     movementState.remove(player);
                     isClimbing.remove(player);
+                    turnState.remove(player);
                     boat.remove();
-                    player.teleport(new Location(player.getWorld(), -24, -60, 574)); // hub
+                    player.teleport(new Location(player.getWorld(), -24, -60, 574));
                     return;
                 }
 
                 int state = movementState.getOrDefault(player, 0);
-                boolean climbing = isClimbing.getOrDefault(player, false);
+                float turnAmount = turnState.getOrDefault(player, 0f);
 
-                // Gravity handling
-                if (!boat.isOnGround() && !climbing) {
-                    Vector vel = boat.getVelocity();
-                    vel.setY(vel.getY() - 0.15);
-                    if (vel.getY() < -1.0) vel.setY(-1.0);
-                    boat.setVelocity(vel);
+                Bukkit.getLogger().info("⏱ Tick -> Player: " + player.getName());
+                Bukkit.getLogger().info("Movement State: " + state + ", Turn: " + turnAmount);
+
+                Vector direction = player.getLocation().getDirection();
+                Location front = boat.getLocation().clone().add(direction.clone().multiply(1.2));
+                front.setY(boat.getLocation().getY());
+
+                boolean climb = false;
+                Material block = front.getBlock().getType();
+
+                if (!front.getBlock().isPassable()) {
+                    Location above = front.clone().add(0, 1, 0);
+                    if (above.getBlock().isPassable()) climb = true;
                 }
 
-                // Movement
-                Vector dir = boat.getLocation().getDirection().normalize();
+                if (block.name().contains("STAIRS") || block.name().contains("SLAB")) {
+                    climb = true;
+                }
+
+                if (block.name().contains("WOOL")) {
+                    climb = false;
+                }
+
+                isClimbing.put(player, climb);
+
+                Vector dir = direction.normalize();
+                if (turnAmount != 0) {
+                    float yaw = player.getLocation().getYaw() + (turnAmount * 4);
+                    Location newLoc = player.getLocation().clone();
+                    newLoc.setYaw(yaw);
+                    dir = newLoc.getDirection().normalize();
+                }
+
                 if (state == 1) {
-                    if (climbing && boat.getVelocity().getY() < 0.5) {
-                        boat.setVelocity(dir.multiply(1.0).setY(0.4));
+                    if (climb && boat.getVelocity().getY() < 0.5) {
+                        boat.setVelocity(dir.multiply(4.0).setY(0.6));
                     } else {
-                        boat.setVelocity(dir.multiply(1.5));
+                        Vector current = boat.getVelocity();
+                        Vector target = dir.multiply(15.5);
+                        Vector smooth = current.multiply(0.2).add(target.multiply(0.9));
+                        boat.setVelocity(smooth);
                     }
+                    boat.getWorld().spawnParticle(Particle.CLOUD, boat.getLocation(), 4, 0.2, 0.2, 0.2, 0.01);
                 } else if (state == -1) {
-                    dir.setX(-dir.getX());
-                    dir.setZ(-dir.getZ());
-                    boat.setVelocity(dir.multiply(1.1));
+                    boat.setVelocity(dir.multiply(-1.1));
                 } else {
                     boat.setVelocity(boat.getVelocity().multiply(0.8));
                 }
+
+                Bukkit.getLogger().info("🏎 Boat velocity: " + boat.getVelocity());
             }
         }.runTaskTimer(plugin, 0L, 1L);
     }
