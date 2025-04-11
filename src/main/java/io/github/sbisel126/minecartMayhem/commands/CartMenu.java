@@ -85,10 +85,10 @@ public class CartMenu implements Listener, CommandExecutor {
 
         Inventory inv = Bukkit.createInventory(player, InventoryType.CHEST, miniMessage.deserialize(invName));
 
-        inv.setItem(Cart_one, getItem(new ItemStack(Material.REDSTONE_BLOCK), "1 Cart", "Click to select", "Race with the Red Cart"));
-        inv.setItem(Cart_two, getItem(new ItemStack(Material.LAPIS_BLOCK), "2 Cart", "Click to select", "Race with the Blue Cart"));
-        inv.setItem(Cart_three, getItem(new ItemStack(Material.IRON_BLOCK), "3 Cart", "Click to select", "Race with the Red Cart"));
-        inv.setItem(Cart_four, getItem(new ItemStack(Material.GOLD_BLOCK), "4 Cart", "Click to select", "Race with the Red Cart"));
+        inv.setItem(Cart_one, getItem(new ItemStack(Material.REDSTONE_BLOCK), "Cart 1", "Click to select", "Race with the Red Cart"));
+        inv.setItem(Cart_two, getItem(new ItemStack(Material.LAPIS_BLOCK), "Cart 2", "Click to select", "Race with the Blue Cart"));
+        inv.setItem(Cart_three, getItem(new ItemStack(Material.IRON_BLOCK), "Cart 3", "Click to select", "Race with the Red Cart"));
+        inv.setItem(Cart_four, getItem(new ItemStack(Material.GOLD_BLOCK), "Cart 4", "Click to select", "Race with the Red Cart"));
 
         player.openInventory(inv);
 
