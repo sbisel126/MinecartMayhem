@@ -1,7 +1,6 @@
 package io.github.sbisel126.minecartMayhem.commands;
 
 import io.github.sbisel126.minecartMayhem.DatabaseHandler;
-import io.github.sbisel126.minecartMayhem.MinecartHandler;
 import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
