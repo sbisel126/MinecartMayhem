@@ -1,3 +1,4 @@
+package org.kart.kartsystem;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -53,7 +55,6 @@ public class MinecartHandler {
     }
 
     private void spawnKartModel(Player player, Boat boat) {
-
         int cartChoice = db.GetPlayerBoatColor(player);
         int modelData = switch (cartChoice) {
             case 1 -> 123456;
@@ -63,34 +64,46 @@ public class MinecartHandler {
             default -> 123456;
         };
 
+        // Position below the boat
         Location loc = boat.getLocation().clone().add(0, -1.7, 0);
+
         ArmorStand stand = (ArmorStand) boat.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
         stand.setInvisible(true);
         stand.setMarker(true);
-        stand.setGravity(true);
+        stand.setGravity(false);
         stand.setInvulnerable(true);
         stand.setSilent(true);
 
+        // Set the model as leggings instead of helmet (optional, depending on model pivot)
         ItemStack modelItem = new ItemStack(Material.CARROT_ON_A_STICK);
         ItemMeta meta = modelItem.getItemMeta();
         if (meta != null) {
             meta.setCustomModelData(modelData);
             modelItem.setItemMeta(meta);
         }
-        stand.setHelmet(modelItem);
+        stand.setHelmet(modelItem); // Or stand.setLeggings(modelItem); if you prefer leggings
 
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (!boat.isValid() || !stand.isValid()) {
+                if (!boat.isValid() || !stand.isValid() || !player.isOnline()) {
                     this.cancel();
-                    stand.remove();
                     return;
                 }
-                stand.teleport(boat.getLocation().clone().add(0, -1.7, 0));
+
+                Location predicted = boat.getLocation().clone()
+                        .add(boat.getLocation().getDirection().normalize().multiply(2.8)) // moves it forward
+                        .add(0, -0.9, 0);
+
+                predicted.setYaw(boat.getLocation().getYaw());
+
+                stand.teleport(predicted);
+
             }
         }.runTaskTimer(plugin, 0L, 1L);
+
         startKartControl(player, boat);
+
     }
 
     private void startKartControl(Player player, Boat boat) {
@@ -101,13 +114,9 @@ public class MinecartHandler {
             public void onPacketReceiving(PacketEvent event) {
                 if (event.getPlayer() != player) return;
 
-                Bukkit.getLogger().info("📥 Packet received from: " + event.getPlayer().getName());
+               // Bukkit.getLogger().info("📥 Packet received from: " + event.getPlayer().getName());
 
-                if (event.getPlayer().getVehicle() == null) {
-                    Bukkit.getLogger().warning("🚫 Player is not in a vehicle!");
-                } else {
-                    Bukkit.getLogger().info("✅ Player vehicle type: " + event.getPlayer().getVehicle().getType());
-                }
+
 
                 PacketContainer packet = event.getPacket();
                 StructureModifier<Boolean> booleans = packet.getStructures().read(0).getBooleans();
@@ -120,7 +129,7 @@ public class MinecartHandler {
 
                 boolean forward = booleans.read(0);
                 boolean backward = booleans.read(1);
-                boolean drifting = driftingObj != null && driftingObj;
+                boolean drifting = booleans.read(2);
                 if (forward) {
                     movementState.put(player, 1); // Mark as moving forward
 
@@ -212,8 +221,8 @@ public class MinecartHandler {
                 int state = movementState.getOrDefault(player, 0);
                 float turnAmount = turnState.getOrDefault(player, 0f);
 
-                Bukkit.getLogger().info("⏱ Tick -> Player: " + player.getName());
-                Bukkit.getLogger().info("Movement State: " + state + ", Turn: " + turnAmount);
+               // Bukkit.getLogger().info("⏱ Tick -> Player: " + player.getName());
+               // Bukkit.getLogger().info("Movement State: " + state + ", Turn: " + turnAmount);
 
                 Vector direction = player.getLocation().getDirection();
                 Location front = boat.getLocation().clone().add(direction.clone().multiply(1.2));
@@ -250,7 +259,7 @@ public class MinecartHandler {
                         boat.setVelocity(dir.multiply(4.0).setY(0.6));
                     } else {
                         Vector current = boat.getVelocity();
-                        Vector target = dir.multiply(15.5);
+                        Vector target = dir.multiply(1.5);
                         Vector smooth = current.multiply(0.2).add(target.multiply(0.9));
                         boat.setVelocity(smooth);
                     }
@@ -261,8 +270,10 @@ public class MinecartHandler {
                     boat.setVelocity(boat.getVelocity().multiply(0.8));
                 }
 
-                Bukkit.getLogger().info("🏎 Boat velocity: " + boat.getVelocity());
+               // Bukkit.getLogger().info("🏎 Boat velocity: " + boat.getVelocity());
             }
         }.runTaskTimer(plugin, 0L, 1L);
+    }
+}
     }
 }
