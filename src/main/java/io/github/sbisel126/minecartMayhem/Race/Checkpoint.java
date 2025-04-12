@@ -12,13 +12,17 @@ public class Checkpoint {
     int x1, y1, z1;
     int x2, y2, z2;
 
+    // we use this ID to identify if the checkpoint is the finish line or not mainly
+    // we reserve id 0 for the start/finish line
+    int checkpointID;
+
     // between these two coordinates, it is presumed there will be a line of blocks
     // the following list contains the blocks that are part of the checkpoint
     // this is a list of blocks that are part of the checkpoint
 
-    List <Block> blocks = new ArrayList<Block>();
+    List <Block> blocks = new ArrayList<>();
 
-    public Checkpoint(MinecartMayhem plugin, int x1, int y1, int z1, int x2, int y2, int z2) {
+    public Checkpoint(MinecartMayhem plugin, int checkpointID, int x1, int y1, int z1, int x2, int y2, int z2) {
         this.plugin = plugin;
 
         // define the checkpoint region
@@ -28,12 +32,13 @@ public class Checkpoint {
         this.x2 = x2;
         this.y2 = y2;
         this.z2 = z2;
-
+        this.checkpointID = checkpointID;
         // generate the coordinate region between the two points
         GenerateBlocks();
     }
 
     // here we generate the blocks that are part of the checkpoint
+    // yes this looks crazy, but it works. please don't question it.
     public void GenerateBlocks() {
         // this method generates the blocks that are part of the checkpoint
         // it is assumed that the blocks are in a straight line between the two points
@@ -56,5 +61,9 @@ public class Checkpoint {
             }
         }
         return false;
+    }
+
+    public int getCheckpointID() {
+        return checkpointID;
     }
 }
