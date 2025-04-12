@@ -49,10 +49,20 @@ public class JoinRace implements Listener, CommandExecutor {
 
         if (slot == grass_map) {
             player.sendMessage("Joining Grass Map");
+            if (plugin.GrassRace.RaceInProgress) {
+                player.sendMessage("Failed to join race: Race in Progress");
+                event.getInventory().close();
+                return;
+            }
             plugin.GrassRaceQueue.AddPlayer(player);
             event.getInventory().close();
         } else if (slot == sand_map) {
-            player.sendMessage("Sand Map selected");
+            player.sendMessage("Joining Sand Map");
+            if (plugin.GrassRace.RaceInProgress) {
+                player.sendMessage("Failed to join race: Race in progress");
+                event.getInventory().close();
+                return;
+            }
             plugin.SandRaceQueue.AddPlayer(player);
             event.getInventory().close();
         }

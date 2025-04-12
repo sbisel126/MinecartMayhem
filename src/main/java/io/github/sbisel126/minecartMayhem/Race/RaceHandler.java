@@ -20,6 +20,7 @@ public class RaceHandler {
     DatabaseHandler db;
     MinecartMayhem plugin;
     String MapName;
+    public Boolean RaceInProgress = false;
 
     // for the race timer
     private int elapsedTime = 0;
@@ -49,6 +50,9 @@ public class RaceHandler {
     }
 
     public void StartRace() {
+        // toggle RaceInProgress to prevent users from joining the race
+        RaceInProgress = true;
+
         //display start of race graphic
         for (RacePlayer racePlayer : players) {
             if (racePlayer != null) {
