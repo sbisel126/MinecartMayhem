@@ -9,9 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -105,7 +103,6 @@ public class RaceHandler {
 
                     // end of race logic function call goes here
                     EndRace();
-                    return;
                 }
             }
         };
@@ -167,10 +164,5 @@ public class RaceHandler {
             Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
             Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
         }
-    }
-
-    public void addCompletedRacer() {
-        this.CompletedRacerCount++;
-        return;
     }
 }

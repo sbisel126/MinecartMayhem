@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MinecartHandler {
-    private JavaPlugin plugin;
-    private ProtocolManager protocolManager;
+    private final JavaPlugin plugin;
+    private final ProtocolManager protocolManager;
     private final Map<Player, Integer> movementState = new HashMap<>();
     private boolean frozenBoat = false;
     private BukkitTask task;

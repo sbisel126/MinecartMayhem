@@ -5,8 +5,6 @@ import io.github.sbisel126.minecartMayhem.MinecartHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-
 import java.util.ArrayList;
 import java.util.List;
 
