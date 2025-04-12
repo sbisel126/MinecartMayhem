@@ -1,8 +1,8 @@
 package io.github.sbisel126.minecartMayhem.Race;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,9 +33,19 @@ public class RaceMoveListener implements Listener {
                     // if it's the finish line, we have some things to check
                     if (checkpoint.getCheckpointID() == 0) {
                         // if player lapcount = 3 we kick them out of the race and log their time
-                        if (racePlayer.currentLap >= 3) {
-                            player.sendMessage("You did it!!!");
-                            player.sendMessage(Component.text("it took you " + raceHandler.getCurrentRaceTime() + " seconds").color(NamedTextColor.GREEN));
+                        if (racePlayer.currentLap >= 1) {
+                            // end of race logic triggers:
+                            racePlayer.setFinishTime(raceHandler.getCurrentRaceTime());
+                            racePlayer.setRacing(false);
+                            raceHandler.CompletedRacerCount++;
+
+                            // send them to the hub and disable their boat
+                            racePlayer.minecart.stopBoatControl();
+                            player.teleport(new Location(player.getWorld(), -24, -60, 574));
+
+                            // player notification
+                            player.sendMessage("You got " + raceHandler.CompletedRacerCount + "th place!");
+                            player.sendMessage("Final time: " + racePlayer.getFinishTime() + " seconds");
                             return;
                         }
                         // so they aren't done yet, lets see if we can increment their lap count or not

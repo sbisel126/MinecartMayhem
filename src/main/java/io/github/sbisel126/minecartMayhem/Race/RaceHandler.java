@@ -5,11 +5,13 @@ import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,6 +23,9 @@ public class RaceHandler {
     MinecartMayhem plugin;
     String MapName;
     public Boolean RaceInProgress = false;
+    int RealPlayerCount = 0;
+
+    int CompletedRacerCount = 0;
 
     // for the race timer
     private int elapsedTime = 0;
@@ -44,11 +49,6 @@ public class RaceHandler {
         StartRace();
     }
 
-    // removes player from the Race Object.
-    public void RemovePlayer(Player player) {
-        this.players.removeIf(racePlayer -> racePlayer.GetUsername().equals(player.getName()));
-    }
-
     public void StartRace() {
         // toggle RaceInProgress to prevent users from joining the race
         RaceInProgress = true;
@@ -56,6 +56,7 @@ public class RaceHandler {
         //display start of race graphic
         for (RacePlayer racePlayer : players) {
             if (racePlayer != null) {
+                RealPlayerCount++;
                 displayRaceStartGraphic(racePlayer);
             }
         }
@@ -74,13 +75,50 @@ public class RaceHandler {
     // starts the auto-incrementing timer
     private void startRaceTimer() {
         elapsedTime = 0; // Reset the timer
-        raceTimer = new BukkitRunnable() {
+        this.raceTimer = new BukkitRunnable() {
             @Override
             public void run() {
                 elapsedTime++;
+
+                // We can check if everyone has finished the race
+                if (CompletedRacerCount == RealPlayerCount) {
+                    // trigger end of race function call
+                    EndRace();
+                    return;
+                }
+
+                // in addition, here is where we can tap in and add an x min race kill-switch
+                if (elapsedTime > 300) {
+                    // kick everyone who is still racing out
+                    // they didn't finish, they don't get a score.
+
+                    for (RacePlayer p : players) {
+                        if (p != null && p.isRacing) {
+                            p.player.sendMessage("You took too long! You have been disqualified.");
+                            p.setRacing(false);
+
+                            // send them to the hub and disable their boat
+                            p.minecart.stopBoatControl();
+                            p.player.teleport(new Location(p.player.getWorld(), -24, -60, 574));
+                        }
+                    }
+
+                    // end of race logic function call goes here
+                    EndRace();
+                    return;
+                }
             }
         };
         raceTimer.runTaskTimer(plugin, 0L, 20L); // Run every second (20 ticks)
+    }
+
+    private void EndRace() {
+        stopRaceTimer();
+        // generate the leaderboard
+        players.getFirst().player.sendMessage("done");
+        // reset the race state to default
+        // allow player joins
+        this.RaceInProgress = false;
     }
 
     // getCurrentTime returns the elapsed time in seconds
@@ -88,12 +126,10 @@ public class RaceHandler {
         return elapsedTime;
     }
 
-    public int stopRaceTimer() {
-        if (raceTimer != null) {
-            raceTimer.cancel();
-            return elapsedTime;
+    public void stopRaceTimer() {
+        if (this.raceTimer != null) {
+            this.raceTimer.cancel();
         }
-        return 0;
     }
 
     private void displayRaceStartGraphic(RacePlayer p) {
@@ -131,5 +167,10 @@ public class RaceHandler {
             Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
             Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
         }
+    }
+
+    public void addCompletedRacer() {
+        this.CompletedRacerCount++;
+        return;
     }
 }

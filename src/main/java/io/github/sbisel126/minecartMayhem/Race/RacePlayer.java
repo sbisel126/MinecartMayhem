@@ -5,6 +5,7 @@ import io.github.sbisel126.minecartMayhem.MinecartHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +16,10 @@ public class RacePlayer {
 
     Player player;
     String Username;
-    MinecartHandler minecart;
+    public MinecartHandler minecart;
     Boolean isRacing = false;
     int currentLap = 0;
+    Integer finishTime;
 
     // list of checkpoints crossed by player
     // this is used to check if the player has crossed all checkpoints
@@ -34,6 +36,15 @@ public class RacePlayer {
         this.Username = player.getName();
         this.player = player;
     }
+
+    public Integer getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(Integer finishTime) {
+        this.finishTime = finishTime;
+    }
+
     public void setMinecart(MinecartHandler minecart) {
         this.minecart = minecart;
     }

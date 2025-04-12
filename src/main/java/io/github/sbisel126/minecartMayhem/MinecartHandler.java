@@ -16,6 +16,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -26,6 +27,8 @@ public class MinecartHandler {
     private ProtocolManager protocolManager;
     private final Map<Player, Integer> movementState = new HashMap<>();
     private boolean frozenBoat = false;
+    private BukkitTask task;
+    private Boat boat;
 
     public MinecartHandler(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -36,7 +39,7 @@ public class MinecartHandler {
         Player player = RP.GetPlayer();
         Location loc = player.getLocation();
 
-        var boat = switch (cartType) {
+        this.boat = switch (cartType) {
             case 2 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
             case 3 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
             case 4 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.OAK_BOAT);
@@ -114,7 +117,7 @@ public class MinecartHandler {
             }
         });
 
-        new BukkitRunnable() {
+       task = new BukkitRunnable() {
             @Override
             public void run() {
                 // if something we don't like happens, just send the player back to the spawn area and remove them from the race.
@@ -178,11 +181,15 @@ public class MinecartHandler {
         }.runTaskTimer(plugin, 0L, 1L); // Runs every tick (20 ticks per second)
     }
 
-    public boolean isFrozenBoat() {
-        return frozenBoat;
-    }
-
     public void setFrozenBoat(boolean frozenBoat) {
         this.frozenBoat = frozenBoat;
     }
+
+    public void stopBoatControl() {
+        if (task != null) {
+            task.cancel();
+        }
+        boat.remove();
+    }
+
 }

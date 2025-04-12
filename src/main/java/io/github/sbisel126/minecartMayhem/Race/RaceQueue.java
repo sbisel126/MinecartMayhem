@@ -87,12 +87,7 @@ public class RaceQueue {
                 if (countdownSeconds <= 0) {
                     // timer complete! Send players off to the races here.
                     StopChecks();
-                    for (RacePlayer p : playersInQueue) {
-                        if(p == null) {
-                            continue;
-                        }
-                        race.AddPlayers(playersInQueue);
-                    }
+                    race.AddPlayers(playersInQueue);
                     cancel();
                     return;
                 }
