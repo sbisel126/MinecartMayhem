@@ -2,7 +2,12 @@ package io.github.sbisel126.minecartMayhem.Race;
 
 import io.github.sbisel126.minecartMayhem.DatabaseHandler;
 import io.github.sbisel126.minecartMayhem.MinecartHandler;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // represents Player information within a race
 public class RacePlayer {
@@ -13,7 +18,10 @@ public class RacePlayer {
     MinecartHandler minecart;
     Boolean isRacing = false;
     int currentLap = 0;
-    int lastCheckpoint = 0;
+
+    // list of checkpoints crossed by player
+    // this is used to check if the player has crossed all checkpoints
+    List<Integer> CheckpointsCrossed = new ArrayList<>();
 
     // starting position of the player
     public Integer StartX;
@@ -51,5 +59,13 @@ public class RacePlayer {
 
     public Boolean isRacing() {
         return isRacing;
+    }
+
+    public void addCheckpointCrossed(int checkpointID) {
+        if (CheckpointsCrossed.contains(checkpointID)) {
+            player.showTitle(Title.title(Component.text("Wrong way!"), Component.text("")));
+            return; // already crossed this checkpoint
+        }
+        CheckpointsCrossed.add(checkpointID);
     }
 }

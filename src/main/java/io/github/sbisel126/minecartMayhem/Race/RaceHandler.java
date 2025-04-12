@@ -124,6 +124,8 @@ public class RaceHandler {
         if (Objects.equals(this.MapName, "grass")) {
             // finish line
             Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -59, -53));
+            Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
+            Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
         }
     }
 }
