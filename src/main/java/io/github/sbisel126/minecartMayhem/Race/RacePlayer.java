@@ -7,9 +7,15 @@ import org.bukkit.entity.Player;
 // represents Player information within a race
 public class RacePlayer {
     int CartColor;
+
     Player player;
     String Username;
     MinecartHandler minecart;
+    Boolean isRacing = false;
+    int currentLap = 0;
+    int lastCheckpoint = 0;
+
+    // starting position of the player
     public Integer StartX;
     public Integer StartY;
     public Integer StartZ;
@@ -35,5 +41,15 @@ public class RacePlayer {
     }
     public Player GetPlayer() {
         return player;
+    }
+
+    // allows us to check if player has finished race yet
+    // called at start and end of race
+    public void setRacing(Boolean isRacing) {
+        this.isRacing = isRacing;
+    }
+
+    public Boolean isRacing() {
+        return isRacing;
     }
 }

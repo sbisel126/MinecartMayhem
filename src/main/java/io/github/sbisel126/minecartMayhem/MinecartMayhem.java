@@ -1,6 +1,7 @@
 package io.github.sbisel126.minecartMayhem;
 
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
+import io.github.sbisel126.minecartMayhem.Race.RaceMoveListener;
 import io.github.sbisel126.minecartMayhem.Race.RaceQueue;
 import io.github.sbisel126.minecartMayhem.commands.CartMenu;
 import io.github.sbisel126.minecartMayhem.commands.DebugCommand;
@@ -46,7 +47,6 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(this));
         Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(this));
         Objects.requireNonNull(getCommand("debug_command")).setExecutor(new DebugCommand(this));
-
         ItemHandler itemBoxManager = new ItemHandler(this);
         Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
 
@@ -57,6 +57,10 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         //Crank up some instances of Race for our RaceQueues
         this.GrassRace = new RaceHandler(this, "grass");
         this.SandRace = new RaceHandler(this, "sand");
+
+        getServer().getPluginManager().registerEvents(new RaceMoveListener(GrassRace), this);
+        getServer().getPluginManager().registerEvents(new RaceMoveListener(SandRace), this);
+
 
         // and here we make the queues that handle assigning players to the races
         this.GrassRaceQueue = new RaceQueue(this, GrassRace, "grass");

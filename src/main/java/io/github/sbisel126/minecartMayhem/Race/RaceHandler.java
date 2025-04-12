@@ -7,8 +7,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 // represents a Race and it's relevant information
 public class RaceHandler {
@@ -18,10 +21,19 @@ public class RaceHandler {
     MinecartMayhem plugin;
     String MapName;
 
+    // for the race timer
+    private int elapsedTime = 0;
+    private BukkitRunnable raceTimer;
+
+    // these are the list of Checkpoints for each map
+    // we just load these manually later
+    public List<Checkpoint> Checkpoints = new ArrayList<>();
+
     public RaceHandler(MinecartMayhem plugin, String MapName) {
         this.db = plugin.db;
         this.plugin = plugin;
         this.MapName = MapName;
+        SetCheckpoints();
     }
 
     // When calls, adds the player to the race.
@@ -43,13 +55,41 @@ public class RaceHandler {
                 displayRaceStartGraphic(racePlayer);
             }
         }
-        //unfreeze boats
+        //unfreeze boats and set them to racing
         for (RacePlayer racePlayer : players) {
             if (racePlayer != null) {
                 racePlayer.minecart.setFrozenBoat(false);
+                // this activates checkpoint checking, so it's important.
+                racePlayer.setRacing(true);
             }
         }
         //start timer
+        startRaceTimer();
+    }
+
+    // starts the auto-incrementing timer
+    private void startRaceTimer() {
+        elapsedTime = 0; // Reset the timer
+        raceTimer = new BukkitRunnable() {
+            @Override
+            public void run() {
+                elapsedTime++;
+            }
+        };
+        raceTimer.runTaskTimer(plugin, 0L, 20L); // Run every second (20 ticks)
+    }
+
+    // getCurrentTime returns the elapsed time in seconds
+    public int getCurrentRaceTime() {
+        return elapsedTime;
+    }
+
+    public int stopRaceTimer() {
+        if (raceTimer != null) {
+            raceTimer.cancel();
+            return elapsedTime;
+        }
+        return 0;
     }
 
     private void displayRaceStartGraphic(RacePlayer p) {
@@ -76,5 +116,13 @@ public class RaceHandler {
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1.33F);
             player.sendMessage("Race started!");
         }, 60L);
+    }
+
+    public void SetCheckpoints() {
+        // each map has a different set of checkpoints
+        if (Objects.equals(this.MapName, "grass")) {
+            Checkpoint checkpoint = new Checkpoint(plugin, 261, -59, -53, 272, -59, -53);
+            Checkpoints.add(checkpoint);
+        }
     }
 }
