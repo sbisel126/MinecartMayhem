@@ -15,8 +15,8 @@ public class DatabaseHandler {
     private Connection dbConnection;
     private Boolean connected = false;
     private final MinecartMayhem instance;
-    public DatabaseHandler(MinecartMayhem mm, ComponentLogger logger){
-        this.logger = logger;
+    public DatabaseHandler(MinecartMayhem mm){
+        this.logger = mm.PluginLogger;
         this.instance = mm;
 
         logger.info(Component.text("We connecting to the db"));
@@ -132,10 +132,10 @@ public class DatabaseHandler {
 
     public int GetPlayerBoatColor(Player player) {
         int playerID = GetPlayerID(player.getName());
-        String query = "SELECT boat_color FROM PlayerConfig WHERE player_id=%i";
+        String query = "SELECT boat_color FROM PlayerConfig WHERE player_id= ?";
         try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
             statement.setString(1, String.valueOf(playerID));
-            ResultSet rs = statement.executeQuery(query);
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -191,7 +191,7 @@ public class DatabaseHandler {
     // Converts map_name String to mapID Integer
     // returns -1 if map not found
     public int GetMapID(String map_name) {
-        String query = "SELECT map_id FROM Maps WHERE map_name=%s";
+        String query = "SELECT map_id FROM Maps WHERE map_name= ?";
         try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
             statement.setString(1, map_name);
             ResultSet rs = statement.executeQuery(query);

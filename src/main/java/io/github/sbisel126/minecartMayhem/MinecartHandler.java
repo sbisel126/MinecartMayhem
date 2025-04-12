@@ -8,6 +8,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
+import io.github.sbisel126.minecartMayhem.Race.RacePlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Boat;
@@ -15,39 +16,45 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MinecartHandler {
-    private JavaPlugin plugin;
-    private ProtocolManager protocolManager;
+    private final JavaPlugin plugin;
+    private final ProtocolManager protocolManager;
     private final Map<Player, Integer> movementState = new HashMap<>();
+    private boolean frozenBoat = false;
+    private BukkitTask task;
+    private Boat boat;
 
     public MinecartHandler(JavaPlugin plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    public void PutPlayerInCart(Player player, boolean cartType) {
+    public void PutPlayerInCart(RacePlayer RP, int cartType) {
+        Player player = RP.GetPlayer();
         Location loc = player.getLocation();
-        Boat boat;
-        // Create a boat at the player's location
-        if (cartType) {
-            boat = (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
-        } else {
-            boat = (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
-        }
+
+        this.boat = switch (cartType) {
+            case 2 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
+            case 3 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
+            case 4 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.OAK_BOAT);
+            default -> (Boat) player.getWorld().spawnEntity(loc, EntityType.SPRUCE_BOAT);
+        };
 
         // Make the player ride the boat
         boat.addPassenger(player);
-
-        startBoatControl(player, boat);
+        // start boat in frozen state
+        frozenBoat = true;
+        startBoatControl(RP, boat);
     }
 
-
-    private void startBoatControl(Player player, Boat boat) {
+    private void startBoatControl(RacePlayer RP, Boat boat) {
+        Player player = RP.GetPlayer();
         // Add this map to track when the boat is climbing
         final Map<Player, Boolean> isClimbing = new HashMap<>();
 
@@ -110,7 +117,7 @@ public class MinecartHandler {
             }
         });
 
-        new BukkitRunnable() {
+       task = new BukkitRunnable() {
             @Override
             public void run() {
                 // if something we don't like happens, just send the player back to the spawn area and remove them from the race.
@@ -122,6 +129,13 @@ public class MinecartHandler {
                     // send back to hub area
                     player.teleport(new Location(player.getWorld(), -24, -60, 574));
                     // remove from race complete
+                    return;
+                }
+
+                if (frozenBoat) {
+                    // If the boat is frozen, set boat velocity to zero
+                    boat.setVelocity(new Vector(0, 0, 0));
+                    //player.teleport(new Location(player.getWorld(), RP.StartX, RP.StartY, RP.StartZ));
                     return;
                 }
 
@@ -166,4 +180,16 @@ public class MinecartHandler {
             }
         }.runTaskTimer(plugin, 0L, 1L); // Runs every tick (20 ticks per second)
     }
+
+    public void setFrozenBoat(boolean frozenBoat) {
+        this.frozenBoat = frozenBoat;
     }
+
+    public void stopBoatControl() {
+        if (task != null) {
+            task.cancel();
+        }
+        boat.remove();
+    }
+
+}

@@ -3,14 +3,14 @@ version: '1.0-SNAPSHOT'
 main: io.github.sbisel126.minecartMayhem.MinecartMayhem
 api-version: '1.21'
 commands:
-  map_menu:
-    description: Opens the map selection menu.
-    usage: /map_menu
-    aliases: map
-    permission: map_menu
+  teleport_menu:
+    description: Opens the map selection menu. DEVELOPMENT USE
+    usage: /teleport_menu
+    aliases: teleport
+    permission: teleport_menu
     permission-message: You do not have permission to open the map menu.
   cart_menu:
-    description: Opens the cart election menu.
+    description: Opens the cart selection menu.
     usage: /cart_menu
     aliases: cart
     permission: cart_menu
@@ -21,3 +21,9 @@ commands:
     aliases: race
     permission: join_race
     permission-message: You do not have permission to join a race.
+  debug_command:
+    description: debug
+    usage: /debug_command
+    aliases: debug
+    permission: debug
+    permission-message: no.

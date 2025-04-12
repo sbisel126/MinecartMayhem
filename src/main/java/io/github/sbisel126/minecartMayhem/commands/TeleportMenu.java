@@ -23,17 +23,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapMenu implements Listener, CommandExecutor {
+public class TeleportMenu implements Listener, CommandExecutor {
     private final String invName = "Map Selector";
     private final Integer grass_map = 11;
     private final Integer sand_map = 15;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
-    private final ComponentLogger logger;
 
-    public MapMenu(ComponentLogger logger, MinecartMayhem plugin) {
-        this.logger = logger;
+    public TeleportMenu(MinecartMayhem plugin) {
+        ComponentLogger logger = plugin.PluginLogger;
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        logger.info(Component.text("MapMenu initialized."));
+        logger.info(Component.text("TeleportMenu initialized."));
     }
 
     @EventHandler
