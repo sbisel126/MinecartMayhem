@@ -119,10 +119,11 @@ public class RaceHandler {
     }
 
     public void SetCheckpoints() {
-        // each map has a different set of checkpoints
+        // each map has a different set of checkpoints, which we have to manually define
+        // kinda yucky!
         if (Objects.equals(this.MapName, "grass")) {
-            Checkpoint checkpoint = new Checkpoint(plugin, 261, -59, -53, 272, -59, -53);
-            Checkpoints.add(checkpoint);
+            // finish line
+            Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -59, -53));
         }
     }
 }
