@@ -27,7 +27,21 @@ public class RaceMoveListener implements Listener {
 
             for (Checkpoint checkpoint : raceHandler.Checkpoints) {
                 if (checkpoint.CheckPlayerInCheckpoint(x, y, z)) {
-                    raceHandler.plugin.getLogger().info(player.getName() + " crossed a checkpoint at time !" + raceHandler.getCurrentRaceTime());
+                    // if it's the finish line, we have some things to check
+                    if (checkpoint.getCheckpointID() == 0) {
+                        // if player lapcount = 3 we kick them out of the race and log their time
+                        if (racePlayer.currentLap >= 3) {
+                            player.sendMessage("You did it!!!");
+                        }
+                        racePlayer.currentLap++;
+                        player.sendMessage("You have completed lap " + racePlayer.currentLap);
+                        raceHandler.plugin.getLogger().info(player.getName() + " completed lap " + racePlayer.currentLap);
+                    } else {
+                        // otherwise, we just update the last checkpoint
+                        racePlayer.lastCheckpoint = checkpoint.getCheckpointID();
+                        player.sendMessage("You have crossed checkpoint " + racePlayer.lastCheckpoint);
+                    }
+                    //raceHandler.plugin.getLogger().info(player.getName() + " crossed a checkpoint at time !" + raceHandler.getCurrentRaceTime());
                     break;
                 }
             }
