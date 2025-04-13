@@ -99,7 +99,8 @@ public class MinecartHandler {
                     if (frontBlockType.name().contains("STAIRS") ||
                             frontBlockType.name().contains("SLAB") ||
                             frontBlockType.name().contains("STEP")) {
-                        needsToClimb = true;
+                        // If it's a spruce slab, we don't want to climb
+                        needsToClimb = !frontBlockType.name().contains("SPRUCE_SLAB");
                     }
                     if (frontBlockType.name().contains("WOOL")) {
                         needsToClimb = false;
