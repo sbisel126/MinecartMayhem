@@ -157,8 +157,10 @@ public class MinecartHandler {
 
                     if (climbing) {
                         // Apply climbing velocity only if boat isn't already moving too fast up
-                        if (boat.getVelocity().getY() < 0.5) {
-                            boat.setVelocity(direction.multiply(1.0).setY(0.4)); // Lower speed and lower jump for smoother climbing
+                        if (boat.isOnGround()) {
+                            if (boat.getVelocity().getY() < 0.7) {
+                                boat.setVelocity(direction.multiply(1.0).add(new Vector(0, 0.7, 0))); // Lower speed and lower jump for smoother climbing
+                            }
                         }
                     } else {
                         // Normal forward movement
