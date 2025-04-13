@@ -27,10 +27,16 @@ public class RaceMoveListener implements Listener {
             int x = player.getLocation().getBlockX();
             int y = player.getLocation().getBlockY();
             int z = player.getLocation().getBlockZ();
+            long now = System.currentTimeMillis();
+            long checkpointCooldown = 1000;
 
             for (Checkpoint checkpoint : raceHandler.Checkpoints) {
                 if (checkpoint.CheckPlayerInCheckpoint(x, y, z)) {
                     // if it's the finish line, we have some things to check
+                    if (!racePlayer.canTriggerCheckpoint(checkpoint.getCheckpointID(), now, checkpointCooldown)) {
+                        return;
+                    }
+
                     if (checkpoint.getCheckpointID() == 0) {
                         // if player lapcount = 3 we kick them out of the race and log their time
                         if (racePlayer.currentLap >= 1) {

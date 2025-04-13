@@ -7,6 +7,8 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 // represents Player information within a race
 public class RacePlayer {
@@ -18,6 +20,8 @@ public class RacePlayer {
     Boolean isRacing = false;
     int currentLap = 0;
     Integer finishTime;
+
+    private Map<Integer, Long> checkpointCooldowns = new HashMap<>();
 
     // list of checkpoints crossed by player
     // this is used to check if the player has crossed all checkpoints
@@ -76,5 +80,18 @@ public class RacePlayer {
             return; // already crossed this checkpoint
         }
         CheckpointsCrossed.add(checkpointID);
+    }
+
+    public boolean canTriggerCheckpoint(int checkpointID, long currentTime, long cooldownMillis) {
+        Long lastTriggered = checkpointCooldowns.get(checkpointID);
+        if (lastTriggered == null || (currentTime - lastTriggered) > cooldownMillis) {
+            checkpointCooldowns.put(checkpointID, currentTime);
+            return true;
+        }
+        return false;
+    }
+
+    public void clearCheckpointCooldowns() {
+        checkpointCooldowns.clear();
     }
 }
