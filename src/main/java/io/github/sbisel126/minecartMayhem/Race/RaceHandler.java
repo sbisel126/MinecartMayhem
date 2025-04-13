@@ -116,6 +116,12 @@ public class RaceHandler {
         // reset the race state to default
         // allow player joins
         this.RaceInProgress = false;
+        // clear out the players
+        this.players.clear();
+        // reset the player count
+        this.RealPlayerCount = 0;
+        // reset the completed racer count
+        this.CompletedRacerCount = 0;
     }
 
     // getCurrentTime returns the elapsed time in seconds
