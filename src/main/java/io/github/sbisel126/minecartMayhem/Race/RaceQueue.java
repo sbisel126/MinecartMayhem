@@ -16,7 +16,7 @@ public class RaceQueue {
     Boolean active = false;
     String MapName;
     private int countdownSeconds = 60;
-    private List<RacePlayer> playersInQueue = new ArrayList<>(Collections.nCopies(5 ,null)) {};
+    private final List<RacePlayer> playersInQueue = new ArrayList<>(Collections.nCopies(5 ,null)) {};
 
     public RaceQueue(MinecartMayhem plugin, RaceHandler race, String MapName) {
         this.race = race;
