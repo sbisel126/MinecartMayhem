@@ -34,13 +34,7 @@ public class RaceQueue {
         // disallow the same player from joining several times
         // this removes them from the queue if they are already in it
         // then they get added back in, in the proper place
-        Iterator<RacePlayer> iterator = playersInQueue.iterator();
-        while (iterator.hasNext()) {
-            RacePlayer rp = iterator.next();
-            if (rp != null && rp.GetUsername().equalsIgnoreCase(player.getName())) {
-                iterator.remove();
-            }
-        }
+        playersInQueue.removeIf(rp -> rp != null && rp.GetUsername().equalsIgnoreCase(player.getName()));
 
         // check if the queue is full
 

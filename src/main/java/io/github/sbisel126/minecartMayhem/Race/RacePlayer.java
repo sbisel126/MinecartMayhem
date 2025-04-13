@@ -21,7 +21,7 @@ public class RacePlayer {
     int currentLap = 0;
     Integer finishTime;
 
-    private Map<Integer, Long> checkpointCooldowns = new HashMap<>();
+    private final Map<Integer, Long> checkpointCooldowns = new HashMap<>();
 
     // list of checkpoints crossed by player
     // this is used to check if the player has crossed all checkpoints
@@ -89,9 +89,5 @@ public class RacePlayer {
             return true;
         }
         return false;
-    }
-
-    public void clearCheckpointCooldowns() {
-        checkpointCooldowns.clear();
     }
 }
