@@ -162,7 +162,7 @@ public class MinecartHandler {
                         }
                     } else {
                         // Normal forward movement
-                        boat.setVelocity(direction.multiply(1.5));
+                        boat.setVelocity(direction.multiply(1.5).add(new Vector(0, -0.5, 0))); // Adjust forward speed if needed
                     }
                 } else if (state == -1) { // Backward
                     Vector direction = boat.getLocation().getDirection().normalize();
