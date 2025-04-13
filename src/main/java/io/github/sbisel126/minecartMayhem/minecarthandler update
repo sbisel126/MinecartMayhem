@@ -36,19 +36,20 @@ public class MinecartHandler {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
+    // Called when the player joins the race
     public void PutPlayerInCart(Player player, boolean useBirchBoat) {
         Location loc = player.getLocation();
         Boat boat = (Boat) player.getWorld().spawnEntity(loc, useBirchBoat ? EntityType.BIRCH_BOAT : EntityType.ACACIA_BOAT);
         boat.setSilent(true);
         boat.setInvulnerable(true);
         boat.addPassenger(player);
-        boat.setGravity(false); // Gravity disabled to prevent falling on slopes
+        boat.setGravity(false); // We handle "gravity" manually
 
-        spawnKartModel(player, boat);
+        spawnKartModel(player, boat); // Attach Blockbench model visually
     }
 
+    // Spawns an ArmorStand that holds the custom model item (like a kart)
     private void spawnKartModel(Player player, Boat boat) {
-        // Get player's kart skin selection
         int cartChoice = db.GetPlayerBoatColor(player);
         int modelData = switch (cartChoice) {
             case 1 -> 123456;
@@ -58,7 +59,7 @@ public class MinecartHandler {
             default -> 123456;
         };
 
-        Location loc = boat.getLocation().clone().add(0, 0, 0);
+        Location loc = boat.getLocation().clone();
 
         ArmorStand stand = (ArmorStand) boat.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
         stand.setInvisible(true);
@@ -67,7 +68,6 @@ public class MinecartHandler {
         stand.setInvulnerable(true);
         stand.setSilent(true);
 
-        // Attach the custom model item to the ArmorStand
         ItemStack modelItem = new ItemStack(Material.CARROT_ON_A_STICK);
         ItemMeta meta = modelItem.getItemMeta();
         if (meta != null) {
@@ -76,7 +76,7 @@ public class MinecartHandler {
         }
         stand.setHelmet(modelItem);
 
-        // Synchronize ArmorStand's position to stay in front of the boat
+        // This task syncs the ArmorStand's position with the boat
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -85,14 +85,13 @@ public class MinecartHandler {
                     return;
                 }
 
-                // Normalize direction and clamp Y so it doesn't fly upward
                 Vector lookDir = boat.getLocation().getDirection().clone();
-                lookDir.setY(0);
+                lookDir.setY(0); // Remove vertical look angle
                 lookDir.normalize();
 
                 Location predicted = boat.getLocation().clone()
-                        .add(lookDir.multiply(3))
-                        .add(0, -0.9, 0);
+                        .add(lookDir.multiply(3))  // move in front
+                        .add(0, 0, 0);          // offset downward
                 predicted.setYaw(boat.getLocation().getYaw());
 
                 stand.teleport(predicted);
@@ -102,10 +101,11 @@ public class MinecartHandler {
         startKartControl(player, boat);
     }
 
+    // Handles movement input and boat physics
     private void startKartControl(Player player, Boat boat) {
         Map<Player, Boolean> isClimbing = new HashMap<>();
 
-        // Listen for player input (forward, backward, drifting, turning)
+        // Listen to WASD + sneak keys
         protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
@@ -122,16 +122,13 @@ public class MinecartHandler {
                 boolean drifting = booleans.read(2);
                 Float sideways = floats.readSafely(0);
 
-                // Forward/Backward movement handling
                 if (forward) {
                     movementState.put(player, 1);
 
-                    // Look direction but ignore Y-axis (no flying)
                     Vector direction = player.getLocation().getDirection().clone();
                     direction.setY(0);
                     direction.normalize();
 
-                    // Climb check
                     Location boatLoc = boat.getLocation();
                     Location frontLoc = boatLoc.clone().add(direction.clone().multiply(1.2));
                     frontLoc.setY(boatLoc.getY());
@@ -154,6 +151,7 @@ public class MinecartHandler {
                     }
 
                     isClimbing.put(player, needsToClimb);
+
                 } else if (backward) {
                     movementState.put(player, -1);
                     isClimbing.put(player, false);
@@ -162,19 +160,19 @@ public class MinecartHandler {
                     isClimbing.put(player, false);
                 }
 
-                // Drift boost logic
+                // Start drift timer
                 if (drifting && !isDrifting.getOrDefault(player, false)) {
                     isDrifting.put(player, true);
                     driftStartTime.put(player, System.currentTimeMillis());
                 }
 
+                // End drift and apply boost
                 if (!drifting && isDrifting.getOrDefault(player, false)) {
                     isDrifting.put(player, false);
                     long driftTime = System.currentTimeMillis() - driftStartTime.getOrDefault(player, 0L);
                     if (driftTime >= 1000) {
-                        // Drift boost (with vertical movement prevented)
                         Vector boost = player.getLocation().getDirection().clone();
-                        boost.setY(0);
+                        boost.setY(0); // Don't launch upward
                         boost.normalize().multiply(2.5);
                         boat.setVelocity(boost);
                         player.sendMessage(ChatColor.AQUA + "Drift Boost!");
@@ -187,7 +185,7 @@ public class MinecartHandler {
             }
         });
 
-        // Apply physics to boat every tick
+        // Physics tick loop (runs every tick)
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -228,7 +226,7 @@ public class MinecartHandler {
 
                 Vector dir = direction.clone();
 
-                // Apply turning if player is pressing A/D
+                // Handle turning (A/D keys)
                 if (turnAmount != 0) {
                     float yaw = player.getLocation().getYaw() + (turnAmount * 4);
                     Location newLoc = player.getLocation().clone();
@@ -238,21 +236,37 @@ public class MinecartHandler {
                     dir.normalize();
                 }
 
-                // Apply forward/backward motion
+                // Forward movement
                 if (state == 1) {
                     if (climb && boat.getVelocity().getY() < 0.5) {
+                        // Climb up slope
                         boat.setVelocity(dir.multiply(4.0).setY(0.6));
                     } else {
+                        // Smooth movement
                         Vector current = boat.getVelocity();
                         Vector target = dir.multiply(1.5);
                         Vector smooth = current.multiply(0.2).add(target.multiply(0.9));
                         boat.setVelocity(smooth);
                     }
                     boat.getWorld().spawnParticle(Particle.CLOUD, boat.getLocation(), 4, 0.2, 0.2, 0.2, 0.01);
-                } else if (state == -1) {
+                }
+                // Backward movement
+                else if (state == -1) {
                     boat.setVelocity(dir.multiply(-1.1));
-                } else {
-                    boat.setVelocity(boat.getVelocity().multiply(0.8)); // natural friction
+                }
+                // Idle
+                else {
+                    boat.setVelocity(boat.getVelocity().multiply(0.8)); // Friction
+                }
+
+                // 🔽 Simulated gravity when not climbing
+                if (!climb && state != 1) {
+                    Location below = boat.getLocation().clone().subtract(0, 0.1, 0);
+                    if (below.getBlock().isPassable()) {
+                        Vector down = boat.getVelocity().clone();
+                        down.setY(Math.max(boat.getVelocity().getY() - 0.08, -0.4));
+                        boat.setVelocity(down);
+                    }
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
