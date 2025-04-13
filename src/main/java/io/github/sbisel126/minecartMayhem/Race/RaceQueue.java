@@ -5,10 +5,8 @@ import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
 
 //RaceQueue is the waiting zone that players get assigned before they get placed in the actual race
 //RaceQueue ensures that >1 user is in a race before starting it
@@ -27,6 +25,26 @@ public class RaceQueue {
     }
 
     public void AddPlayer(Player player) {
+        // set a hard maximum of 5 players in the queue
+        long currentCount = playersInQueue.stream().filter(Objects::nonNull).count();
+        if (currentCount >= 5) {
+            player.sendMessage("The race is full. Try again later.");
+            return;
+        }
+        // disallow the same player from joining several times
+        // this removes them from the queue if they are already in it
+        // then they get added back in, in the proper place
+        Iterator<RacePlayer> iterator = playersInQueue.iterator();
+        while (iterator.hasNext()) {
+            RacePlayer rp = iterator.next();
+            if (rp != null && rp.GetUsername().equalsIgnoreCase(player.getName())) {
+                iterator.remove();
+            }
+        }
+
+        // check if the queue is full
+
+
         //Create RacePlayer object
         RacePlayer NewRP = new RacePlayer(player, plugin.db);
         if (!active) {
@@ -88,7 +106,7 @@ public class RaceQueue {
                     // timer complete! Send players off to the races here.
                     StopChecks();
                     race.AddPlayers(playersInQueue);
-                    playersInQueue = new ArrayList(Collections.nCopies(5 ,null)) {};
+                    Collections.fill(playersInQueue, null);
                     cancel();
                     return;
                 }
@@ -119,5 +137,18 @@ public class RaceQueue {
     }
     public void StopChecks() {
         active = false;
+    }
+
+    public void RemovePlayer(Player player) {
+        for (int i = 0; i < playersInQueue.size(); i++) {
+            RacePlayer rp = playersInQueue.get(i);
+            if (rp != null && rp.GetUsername().equalsIgnoreCase(player.getName())) {
+                playersInQueue.set(i, null);
+                player.sendMessage("You have been removed from the race queue.");
+                plugin.getLogger().info(player.getName() + " was removed from the race queue.");
+                return;
+            }
+        }
+        player.sendMessage("You are not currently in the race queue.");
     }
 }
