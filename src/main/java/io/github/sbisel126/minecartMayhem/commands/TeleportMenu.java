@@ -26,6 +26,7 @@ import java.util.List;
 public class TeleportMenu implements Listener, CommandExecutor {
     private final String invName = "Map Selector";
     private final Integer grass_map = 11;
+    private final Integer hub_area = 13;
     private final Integer sand_map = 15;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
@@ -54,6 +55,9 @@ public class TeleportMenu implements Listener, CommandExecutor {
             player.sendMessage("Sand Map selected");
             player.teleport(new Location(player.getWorld(), -270.0, -60.0, 52.0, 1, 0));
             event.getInventory().close();
+        } else if (slot == hub_area) {
+            player.sendMessage("Hub Area selected");
+            player.teleport(new Location(player.getWorld(), -24, -60, 574));
         }
 
         event.setCancelled(true);
@@ -70,7 +74,7 @@ public class TeleportMenu implements Listener, CommandExecutor {
 
         inv.setItem(grass_map, getItem(new ItemStack(Material.GRASS_BLOCK), "Grass Map", "Click to join", "Race on the Grass Map"));
         inv.setItem(sand_map, getItem(new ItemStack(Material.SAND), "Sand Map", "Click to join", "Race on the Sand Map"));
-
+        inv.setItem(hub_area, getItem(new ItemStack(Material.BEDROCK), "Hub Area", "Click to join", "Teleport to the Hub Area"));
         player.openInventory(inv);
 
         return true;
