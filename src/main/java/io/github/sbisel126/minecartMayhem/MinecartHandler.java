@@ -147,12 +147,7 @@ public class MinecartHandler {
                 if (!boat.isOnGround() && !climbing) {
                     Vector currentVelocity = boat.getVelocity();
                     // Apply stronger downward acceleration (more negative Y value = stronger gravity)
-                    currentVelocity.setY(currentVelocity.getY() - 0.15); // Increase this value for stronger gravity
-
-                    // Set a terminal velocity to prevent falling too fast
-                    if (currentVelocity.getY() < -1.0) {
-                        currentVelocity.setY(-1.0);
-                    }
+                    currentVelocity.setY(currentVelocity.getY() - 0.5); // Increase this value for stronger gravity
 
                     boat.setVelocity(currentVelocity);
                 }
