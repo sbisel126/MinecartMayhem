@@ -74,7 +74,7 @@ public class RaceMoveListener implements Listener {
                         // so this isn't the finish line.
                         // otherwise, we just update the last checkpoint
                         racePlayer.addCheckpointCrossed(checkpoint.getCheckpointID());
-                        raceHandler.plugin.getLogger().info(player.getName() + " crossed a checkpoint at time " + raceHandler.getCurrentRaceTime());
+                        //raceHandler.plugin.getLogger().info(player.getName() + " crossed a checkpoint at time " + raceHandler.getCurrentRaceTime());
                     }
                     break;
                 }
