@@ -169,6 +169,13 @@ public class RaceHandler {
             Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -59, -53));
             Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
             Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
+            Checkpoints.add(new Checkpoint(plugin, 4, 272, -59, -161, 274, -59, -168));
+            Checkpoints.add(new Checkpoint(plugin, 5, 312, -59, -168, 312, -59, -161));
+            Checkpoints.add(new Checkpoint(plugin, 6, 487, -59, -94, 272, -59, -94));
+            Checkpoints.add(new Checkpoint(plugin, 7, 470, -59, 41, 470, -59, 57));
+            Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -59, 41));
+            Checkpoints.add(new Checkpoint(plugin, 9, 282, -63, 57, 282, -63, 42));
+            Checkpoints.add(new Checkpoint(plugin, 10, 264, -63, 25, 273, -63, 25));
         }
     }
 }
