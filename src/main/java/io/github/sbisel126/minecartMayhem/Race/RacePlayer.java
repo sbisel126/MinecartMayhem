@@ -18,7 +18,7 @@ public class RacePlayer {
     String Username;
     public MinecartHandler minecart;
     Boolean isRacing = false;
-    int currentLap = 0;
+    int currentLap = 1;
     Integer finishTime;
 
     private final Map<Integer, Long> checkpointCooldowns = new HashMap<>();
