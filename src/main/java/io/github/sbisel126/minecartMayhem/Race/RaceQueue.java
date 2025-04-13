@@ -105,9 +105,19 @@ public class RaceQueue {
                 if (countdownSeconds <= 0) {
                     // timer complete! Send players off to the races here.
                     StopChecks();
-                    race.AddPlayers(playersInQueue);
+
+                    // only pass the non-null Race Players to the game
+                    List<RacePlayer> validPlayers = playersInQueue.stream()
+                            .filter(Objects::nonNull)
+                            .toList();
+
+                    race.AddPlayers(validPlayers);
+
+                    // now that the players have been handed off to the RaceHandler, lets reset the Queue object
                     Collections.fill(playersInQueue, null);
                     cancel();
+
+                    // we're out of here!
                     return;
                 }
 
@@ -149,6 +159,5 @@ public class RaceQueue {
                 return;
             }
         }
-        player.sendMessage("You are not currently in the race queue.");
     }
 }

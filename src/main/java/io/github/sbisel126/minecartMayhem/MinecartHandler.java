@@ -23,14 +23,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MinecartHandler {
-    private final JavaPlugin plugin;
+    private final MinecartMayhem plugin;
     private final ProtocolManager protocolManager;
     private final Map<Player, Integer> movementState = new HashMap<>();
     private boolean frozenBoat = false;
     private BukkitTask task;
     private Boat boat;
 
-    public MinecartHandler(JavaPlugin plugin) {
+    public MinecartHandler(MinecartMayhem plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
@@ -129,6 +129,12 @@ public class MinecartHandler {
                     boat.remove();
                     // send back to hub area
                     player.teleport(new Location(player.getWorld(), -24, -60, 574));
+                    // attempt to remove from all queues and races
+                    plugin.GrassRaceQueue.RemovePlayer(player);
+                    plugin.SandRaceQueue.RemovePlayer(player);
+                    plugin.GrassRace.RemovePlayer(player);
+                    plugin.SandRace.RemovePlayer(player);
+
                     // remove from race complete
                     return;
                 }

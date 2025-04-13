@@ -43,8 +43,19 @@ public class RaceHandler {
     // When calls, adds the player to the race.
     // also creates an instance of RacePlayer for the player
     public void AddPlayers(List<RacePlayer> players) {
-        this.players = players;
+        this.players = new ArrayList<>(players);
         StartRace();
+    }
+
+    public void RemovePlayer(Player player) {
+        // nuke the relevant RacePlayer object in the players list
+        for (int i = 0; i < players.size(); i++) {
+            RacePlayer racePlayer = players.get(i);
+            if (racePlayer != null && racePlayer.GetUsername().equalsIgnoreCase(player.getName())) {
+                players.remove(i);
+                break;
+            }
+        }
     }
 
     public void StartRace() {
