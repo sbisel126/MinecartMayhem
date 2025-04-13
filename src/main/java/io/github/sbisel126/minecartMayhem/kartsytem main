@@ -1,0 +1,114 @@
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.reflect.StructureModifier;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.kart.kartsystem.Race.RaceHandler;
+import org.kart.kartsystem.commands.CartMenu;
+import org.kart.kartsystem.commands.JoinRace;
+import org.kart.kartsystem.commands.MapMenu;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+public class Kartsystem extends JavaPlugin implements Listener {
+    private DatabaseHandler db;
+    private MiniMessage miniMessage;
+    private MinecartHandler kartHandler;
+    private RaceHandler raceHandler;
+
+    public static final Map<Player, Boolean> turningLeftMap = new HashMap<>();
+    public static final Map<Player, Boolean> turningRightMap = new HashMap<>();
+    @Override
+    public void onEnable() {
+        ComponentLogger logger = getComponentLogger();
+        getServer().getPluginManager().registerEvents(new ItemHandler(this), this);
+        this.db = new DatabaseHandler(this, logger);
+
+        // Initialize kart handler
+        this.kartHandler = new MinecartHandler(this, db);
+
+        // Initialize race logic handler
+        this.raceHandler = new RaceHandler(db);
+
+        // Register event listener for join handling
+        Bukkit.getPluginManager().registerEvents(this, this);
+
+        // Register commands
+        Objects.requireNonNull(getCommand("map_menu")).setExecutor(new MapMenu(logger, this));
+        Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(logger, this, db));
+        Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(logger, this, raceHandler, kartHandler));
+
+        // Register item box handler
+        ItemHandler itemHandler = new ItemHandler(this);
+        Bukkit.getPluginManager().registerEvents(itemHandler, this);
+
+        // Register example item boxes
+        itemHandler.registerItemBox(new Location(Bukkit.getWorld("world"), 100, 65, 200));
+        itemHandler.registerItemBox(new Location(Bukkit.getWorld("world"), 150, 65, 250));
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this,
+                ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
+
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                Player player = event.getPlayer();
+                StructureModifier<Boolean> booleans = event.getPacket().getBooleans();
+
+                if (booleans.size() >= 2) {
+                    boolean left = booleans.read(0);  // A key
+                    boolean right = booleans.read(1); // D key
+
+                    turningLeftMap.put(player, left);
+                    turningRightMap.put(player, right);
+                }
+            }
+        });
+
+        logger.info(Component.text("Kartsystem plugin enabled successfully."));
+
+    }
+
+    @Override
+    public void onDisable() {
+        getComponentLogger().info(Component.text("Kartsystem plugin disabled."));
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // Register player in database
+        db.InsertUser(player);
+
+        // Send to hub and show welcome title
+        player.teleport(new Location(player.getWorld(), -24, -60, 574));
+        player.showTitle(
+                Title.title(
+                        Component.text("Welcome to"),
+                        Component.text("Minecart Mayhem", NamedTextColor.RED)
+                )
+        );
+    }
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        turningLeftMap.remove(player);
+        turningRightMap.remove(player);
+    }
+}
