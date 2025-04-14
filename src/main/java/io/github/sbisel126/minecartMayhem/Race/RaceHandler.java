@@ -137,7 +137,13 @@ public class RaceHandler {
 
     public int scoreRace(){
         int totalScore = 100;
-        totalScore *= (int) Math.floor(((1024.00 / this.elapsedTime) * 256.00));
+        
+        // catch edge case where elapsedTime can be 0.  Avoids a divide-by-zero.
+        if (this.elapsedTime <= 0){
+            totalScore = 0;
+        }else {
+            totalScore *= (int) Math.floor(((1024.00 / this.elapsedTime) * 256.00));
+        }
         return totalScore;
     }
 
