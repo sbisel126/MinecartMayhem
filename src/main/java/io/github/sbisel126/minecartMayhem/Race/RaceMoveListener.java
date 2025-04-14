@@ -69,7 +69,7 @@ public class RaceMoveListener implements Listener {
                             player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
                             // player notification
-                            player.sendMessage("You got " + getOrdinal(raceHandler.CompletedRacerCount) + "th place!");
+                            player.sendMessage("You got " + getOrdinal(raceHandler.CompletedRacerCount) + " place!");
                             player.sendMessage("Final time: " + formatTime(racePlayer.getFinishTime()));
                             return;
                         }
