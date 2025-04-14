@@ -176,7 +176,7 @@ public class RaceHandler {
         // each map has a different set of checkpoints, which we have to manually define
         // kinda yucky!
         if (Objects.equals(this.MapName, "grass")) {
-            // finish line
+            // finish line is always id 0
             Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -59, -53));
             Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
             Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
@@ -187,6 +187,16 @@ public class RaceHandler {
             Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -59, 41));
             Checkpoints.add(new Checkpoint(plugin, 9, 282, -63, 57, 282, -63, 42));
             Checkpoints.add(new Checkpoint(plugin, 10, 264, -63, 25, 273, -63, 25));
+        } else if (Objects.equals(this.MapName, "sand")) {
+            Checkpoints.add((new Checkpoint(plugin, 0, -264, -60, 55, -278, -60, 55)));
+            Checkpoints.add(new Checkpoint(plugin, 1, -265, -60, 139, -277, -60, 139));
+            Checkpoints.add(new Checkpoint(plugin, 2, -215, -60, 185, -215, -60, 193));
+            Checkpoints.add(new Checkpoint(plugin, 3, -188, -55, 230, -180, -55, 230));
+            Checkpoints.add(new Checkpoint(plugin, 4, -145, -60, 157, -137, -60, 157));
+            Checkpoints.add(new Checkpoint(plugin, 5, -138, -60, 49, -144, -60, 49));
+            Checkpoints.add(new Checkpoint(plugin, 6, -153, -60, -2, -153, -60, -13));
+            Checkpoints.add(new Checkpoint(plugin, 7, -219, -60, -19, -219, -60, -14));
+            Checkpoints.add(new Checkpoint(plugin, 8, -259, -60, -11, -277, -60, -11));
         }
     }
 }
