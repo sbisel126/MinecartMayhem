@@ -137,7 +137,7 @@ public class RaceHandler {
 
     public int scoreRace(){
         int totalScore = 100;
-        
+
         // catch edge case where elapsedTime can be 0.  Avoids a divide-by-zero.
         if (this.elapsedTime <= 0){
             totalScore = 0;
@@ -145,6 +145,10 @@ public class RaceHandler {
             totalScore *= (int) Math.floor(((1024.00 / this.elapsedTime) * 256.00));
         }
         return totalScore;
+    }
+
+    private boolean isHighScore(Integer score){
+        return score > db.GetMapTopScores(MapName).getLast();
     }
 
     private void displayRaceStartGraphic(RacePlayer p) {
