@@ -69,16 +69,7 @@ public class RaceHandler {
                 displayRaceStartGraphic(racePlayer);
             }
         }
-        //unfreeze boats and set them to racing
-        for (RacePlayer racePlayer : players) {
-            if (racePlayer != null) {
-                racePlayer.minecart.setFrozenBoat(false);
-                // this activates checkpoint checking, so it's important.
-                racePlayer.setRacing(true);
-            }
-        }
-        //start timer
-        startRaceTimer();
+
     }
 
     // starts the auto-incrementing timer
@@ -122,8 +113,6 @@ public class RaceHandler {
 
     private void EndRace() {
         stopRaceTimer();
-        // generate the leaderboard
-        players.getFirst().player.sendMessage("done");
         // reset the race state to default
         // allow player joins
         this.RaceInProgress = false;
@@ -169,6 +158,17 @@ public class RaceHandler {
             player.showTitle(Title.title(Component.text("Go!", NamedTextColor.GREEN),Component.text("")));
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1.33F);
             player.sendMessage("Race started!");
+
+            //unfreeze boats and set them to racing
+            for (RacePlayer racePlayer : players) {
+                if (racePlayer != null) {
+                    racePlayer.minecart.setFrozenBoat(false);
+                    // this activates checkpoint checking, so it's important.
+                    racePlayer.setRacing(true);
+                }
+            }
+            //start timer
+            startRaceTimer();
         }, 60L);
     }
 

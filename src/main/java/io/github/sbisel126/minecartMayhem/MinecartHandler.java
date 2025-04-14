@@ -62,6 +62,11 @@ public class MinecartHandler {
             public void onPacketReceiving(PacketEvent event) {
                 if (event.getPlayer() != player) return;
 
+                if (frozenBoat) {
+                    event.setCancelled(true); // cancel the input
+                    return;
+                }
+
                 PacketContainer packet = event.getPacket();
                 StructureModifier<Boolean> booleans = packet.getStructures().read(0).getBooleans();
 
