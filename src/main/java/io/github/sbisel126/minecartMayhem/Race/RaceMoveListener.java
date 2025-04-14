@@ -15,6 +15,25 @@ public class RaceMoveListener implements Listener {
         this.raceHandler = raceHandler;
     }
 
+    // used for string formatting
+    private static String getOrdinal(int number) {
+        if (number >= 11 && number <= 13) {
+            return number + "th";
+        }
+        return switch (number % 10) {
+            case 1 -> number + "st";
+            case 2 -> number + "nd";
+            case 3 -> number + "rd";
+            default -> number + "th";
+        };
+    }
+
+    private static String formatTime(int secs) {
+        int minutes = secs / 60;
+        int seconds = secs % 60;
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
@@ -50,8 +69,8 @@ public class RaceMoveListener implements Listener {
                             player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
                             // player notification
-                            player.sendMessage("You got " + raceHandler.CompletedRacerCount + "th place!");
-                            player.sendMessage("Final time: " + racePlayer.getFinishTime() + " seconds");
+                            player.sendMessage("You got " + getOrdinal(raceHandler.CompletedRacerCount) + "th place!");
+                            player.sendMessage("Final time: " + formatTime(racePlayer.getFinishTime()));
                             return;
                         }
                         // so they aren't done yet, lets see if we can increment their lap count or not
