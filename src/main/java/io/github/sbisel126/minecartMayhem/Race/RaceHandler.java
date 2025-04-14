@@ -137,7 +137,7 @@ public class RaceHandler {
 
     public int scoreRace(){
         int totalScore = 100;
-        totalScore *= (int) ((500.00 / this.elapsedTime) * 2.0);
+        totalScore *= (int) Math.floor(((1024.00 / this.elapsedTime) * 256.00));
         return totalScore;
     }
 
