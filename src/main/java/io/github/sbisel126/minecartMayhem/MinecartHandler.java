@@ -47,6 +47,7 @@ public class MinecartHandler {
         boat.setInvulnerable(true);
         boat.addPassenger(player);
         boat.setGravity(false); // We handle gravity manually
+        this.boat = boat;
 
         spawnKartModel(RP, boat);
         frozenBoat = true;
@@ -252,7 +253,7 @@ public class MinecartHandler {
         if (task != null) {
             task.cancel();
         }
-        boat.remove();
+        this.boat.remove();
          if (modelStand != null) modelStand.remove();
     }
 
