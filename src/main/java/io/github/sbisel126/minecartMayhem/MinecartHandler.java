@@ -14,7 +14,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -23,14 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MinecartHandler {
-    private final JavaPlugin plugin;
+    private final MinecartMayhem plugin;
     private final ProtocolManager protocolManager;
     private final Map<Player, Integer> movementState = new HashMap<>();
     private boolean frozenBoat = false;
     private BukkitTask task;
     private Boat boat;
 
-    public MinecartHandler(JavaPlugin plugin) {
+    public MinecartHandler(MinecartMayhem plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
@@ -62,6 +61,11 @@ public class MinecartHandler {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 if (event.getPlayer() != player) return;
+
+                if (frozenBoat) {
+                    event.setCancelled(true); // cancel the input
+                    return;
+                }
 
                 PacketContainer packet = event.getPacket();
                 StructureModifier<Boolean> booleans = packet.getStructures().read(0).getBooleans();
@@ -99,7 +103,8 @@ public class MinecartHandler {
                     if (frontBlockType.name().contains("STAIRS") ||
                             frontBlockType.name().contains("SLAB") ||
                             frontBlockType.name().contains("STEP")) {
-                        needsToClimb = true;
+                        // If it's a spruce slab, we don't want to climb
+                        needsToClimb = !frontBlockType.name().contains("SPRUCE_SLAB");
                     }
                     if (frontBlockType.name().contains("WOOL")) {
                         needsToClimb = false;
@@ -128,6 +133,12 @@ public class MinecartHandler {
                     boat.remove();
                     // send back to hub area
                     player.teleport(new Location(player.getWorld(), -24, -60, 574));
+                    // attempt to remove from all queues and races
+                    plugin.GrassRaceQueue.RemovePlayer(player);
+                    plugin.SandRaceQueue.RemovePlayer(player);
+                    plugin.GrassRace.RemovePlayer(player);
+                    plugin.SandRace.RemovePlayer(player);
+
                     // remove from race complete
                     return;
                 }
@@ -146,12 +157,7 @@ public class MinecartHandler {
                 if (!boat.isOnGround() && !climbing) {
                     Vector currentVelocity = boat.getVelocity();
                     // Apply stronger downward acceleration (more negative Y value = stronger gravity)
-                    currentVelocity.setY(currentVelocity.getY() - 0.15); // Increase this value for stronger gravity
-
-                    // Set a terminal velocity to prevent falling too fast
-                    if (currentVelocity.getY() < -1.0) {
-                        currentVelocity.setY(-1.0);
-                    }
+                    currentVelocity.setY(currentVelocity.getY() - 0.5); // Increase this value for stronger gravity
 
                     boat.setVelocity(currentVelocity);
                 }
@@ -161,12 +167,14 @@ public class MinecartHandler {
 
                     if (climbing) {
                         // Apply climbing velocity only if boat isn't already moving too fast up
-                        if (boat.getVelocity().getY() < 0.5) {
-                            boat.setVelocity(direction.multiply(1.0).setY(0.4)); // Lower speed and lower jump for smoother climbing
+                        if (boat.isOnGround()) {
+                            if (boat.getVelocity().getY() < 0.7) {
+                                boat.setVelocity(direction.multiply(1.0).add(new Vector(0, 0.7, 0))); // Lower speed and lower jump for smoother climbing
+                            }
                         }
                     } else {
                         // Normal forward movement
-                        boat.setVelocity(direction.multiply(1.5));
+                        boat.setVelocity(direction.multiply(1.5).add(new Vector(0, -0.5, 0))); // Adjust forward speed if needed
                     }
                 } else if (state == -1) { // Backward
                     Vector direction = boat.getLocation().getDirection().normalize();

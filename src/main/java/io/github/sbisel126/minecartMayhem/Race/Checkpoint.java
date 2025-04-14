@@ -26,12 +26,12 @@ public class Checkpoint {
         this.plugin = plugin;
 
         // define the checkpoint region
-        this.x1 = x1;
-        this.y1 = y1;
-        this.z1 = z1;
-        this.x2 = x2;
-        this.y2 = y2;
-        this.z2 = z2;
+        this.x1 = Math.min(x1, x2);
+        this.y1 = Math.min(y1, y2);
+        this.z1 = Math.min(z1, z2);
+        this.x2 = Math.max(x1, x2);
+        this.y2 = Math.max(y1, y2);
+        this.z2 = Math.max(z1, z2);
         this.checkpointID = checkpointID;
         // generate the coordinate region between the two points
         GenerateBlocks();

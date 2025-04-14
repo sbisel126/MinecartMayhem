@@ -43,8 +43,19 @@ public class RaceHandler {
     // When calls, adds the player to the race.
     // also creates an instance of RacePlayer for the player
     public void AddPlayers(List<RacePlayer> players) {
-        this.players = players;
+        this.players = new ArrayList<>(players);
         StartRace();
+    }
+
+    public void RemovePlayer(Player player) {
+        // nuke the relevant RacePlayer object in the players list
+        for (int i = 0; i < players.size(); i++) {
+            RacePlayer racePlayer = players.get(i);
+            if (racePlayer != null && racePlayer.GetUsername().equalsIgnoreCase(player.getName())) {
+                players.remove(i);
+                break;
+            }
+        }
     }
 
     public void StartRace() {
@@ -58,16 +69,7 @@ public class RaceHandler {
                 displayRaceStartGraphic(racePlayer);
             }
         }
-        //unfreeze boats and set them to racing
-        for (RacePlayer racePlayer : players) {
-            if (racePlayer != null) {
-                racePlayer.minecart.setFrozenBoat(false);
-                // this activates checkpoint checking, so it's important.
-                racePlayer.setRacing(true);
-            }
-        }
-        //start timer
-        startRaceTimer();
+
     }
 
     // starts the auto-incrementing timer
@@ -86,7 +88,7 @@ public class RaceHandler {
                 }
 
                 // in addition, here is where we can tap in and add an x min race kill-switch
-                if (elapsedTime > 300) {
+                if (elapsedTime > 500) {
                     // kick everyone who is still racing out
                     // they didn't finish, they don't get a score.
 
@@ -111,11 +113,15 @@ public class RaceHandler {
 
     private void EndRace() {
         stopRaceTimer();
-        // generate the leaderboard
-        players.getFirst().player.sendMessage("done");
         // reset the race state to default
         // allow player joins
         this.RaceInProgress = false;
+        // clear out the players
+        this.players.clear();
+        // reset the player count
+        this.RealPlayerCount = 0;
+        // reset the completed racer count
+        this.CompletedRacerCount = 0;
     }
 
     // getCurrentTime returns the elapsed time in seconds
@@ -152,6 +158,17 @@ public class RaceHandler {
             player.showTitle(Title.title(Component.text("Go!", NamedTextColor.GREEN),Component.text("")));
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1.33F);
             player.sendMessage("Race started!");
+
+            //unfreeze boats and set them to racing
+            for (RacePlayer racePlayer : players) {
+                if (racePlayer != null) {
+                    racePlayer.minecart.setFrozenBoat(false);
+                    // this activates checkpoint checking, so it's important.
+                    racePlayer.setRacing(true);
+                }
+            }
+            //start timer
+            startRaceTimer();
         }, 60L);
     }
 
@@ -159,10 +176,27 @@ public class RaceHandler {
         // each map has a different set of checkpoints, which we have to manually define
         // kinda yucky!
         if (Objects.equals(this.MapName, "grass")) {
-            // finish line
+            // finish line is always id 0
             Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -59, -53));
             Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
             Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
+            Checkpoints.add(new Checkpoint(plugin, 4, 272, -59, -161, 274, -59, -168));
+            Checkpoints.add(new Checkpoint(plugin, 5, 312, -59, -168, 312, -59, -161));
+            Checkpoints.add(new Checkpoint(plugin, 6, 487, -59, -94, 272, -59, -94));
+            Checkpoints.add(new Checkpoint(plugin, 7, 470, -59, 41, 470, -59, 57));
+            Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -59, 41));
+            Checkpoints.add(new Checkpoint(plugin, 9, 282, -63, 57, 282, -63, 42));
+            Checkpoints.add(new Checkpoint(plugin, 10, 264, -63, 25, 273, -63, 25));
+        } else if (Objects.equals(this.MapName, "sand")) {
+            Checkpoints.add((new Checkpoint(plugin, 0, -264, -60, 55, -278, -60, 55)));
+            Checkpoints.add(new Checkpoint(plugin, 1, -265, -60, 139, -277, -60, 139));
+            Checkpoints.add(new Checkpoint(plugin, 2, -215, -60, 185, -215, -60, 193));
+            Checkpoints.add(new Checkpoint(plugin, 3, -188, -55, 230, -180, -55, 230));
+            Checkpoints.add(new Checkpoint(plugin, 4, -145, -60, 157, -137, -60, 157));
+            Checkpoints.add(new Checkpoint(plugin, 5, -138, -60, 49, -144, -60, 49));
+            Checkpoints.add(new Checkpoint(plugin, 6, -153, -60, -2, -153, -60, -13));
+            Checkpoints.add(new Checkpoint(plugin, 7, -219, -60, -19, -219, -60, -14));
+            Checkpoints.add(new Checkpoint(plugin, 8, -259, -60, -11, -277, -60, -11));
         }
     }
 }

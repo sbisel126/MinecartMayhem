@@ -15,6 +15,25 @@ public class RaceMoveListener implements Listener {
         this.raceHandler = raceHandler;
     }
 
+    // used for string formatting
+    private static String getOrdinal(int number) {
+        if (number >= 11 && number <= 13) {
+            return number + "th";
+        }
+        return switch (number % 10) {
+            case 1 -> number + "st";
+            case 2 -> number + "nd";
+            case 3 -> number + "rd";
+            default -> number + "th";
+        };
+    }
+
+    private static String formatTime(int secs) {
+        int minutes = secs / 60;
+        int seconds = secs % 60;
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
@@ -27,13 +46,19 @@ public class RaceMoveListener implements Listener {
             int x = player.getLocation().getBlockX();
             int y = player.getLocation().getBlockY();
             int z = player.getLocation().getBlockZ();
+            long now = System.currentTimeMillis();
+            long checkpointCooldown = 1000;
 
             for (Checkpoint checkpoint : raceHandler.Checkpoints) {
                 if (checkpoint.CheckPlayerInCheckpoint(x, y, z)) {
                     // if it's the finish line, we have some things to check
+                    if (!racePlayer.canTriggerCheckpoint(checkpoint.getCheckpointID(), now, checkpointCooldown)) {
+                        return;
+                    }
+
                     if (checkpoint.getCheckpointID() == 0) {
                         // if player lapcount = 3 we kick them out of the race and log their time
-                        if (racePlayer.currentLap >= 1) {
+                        if (racePlayer.currentLap == 3) {
                             // end of race logic triggers:
                             racePlayer.setFinishTime(raceHandler.getCurrentRaceTime());
                             racePlayer.setRacing(false);
@@ -44,8 +69,8 @@ public class RaceMoveListener implements Listener {
                             player.teleport(new Location(player.getWorld(), -24, -60, 574));
 
                             // player notification
-                            player.sendMessage("You got " + raceHandler.CompletedRacerCount + "th place!");
-                            player.sendMessage("Final time: " + racePlayer.getFinishTime() + " seconds");
+                            player.sendMessage("You got " + getOrdinal(raceHandler.CompletedRacerCount) + " place!");
+                            player.sendMessage("Final time: " + formatTime(racePlayer.getFinishTime()));
                             return;
                         }
                         // so they aren't done yet, lets see if we can increment their lap count or not
@@ -68,7 +93,7 @@ public class RaceMoveListener implements Listener {
                         // so this isn't the finish line.
                         // otherwise, we just update the last checkpoint
                         racePlayer.addCheckpointCrossed(checkpoint.getCheckpointID());
-                        raceHandler.plugin.getLogger().info(player.getName() + " crossed a checkpoint at time " + raceHandler.getCurrentRaceTime());
+                        //raceHandler.plugin.getLogger().info(player.getName() + " crossed a checkpoint at time " + raceHandler.getCurrentRaceTime());
                     }
                     break;
                 }
