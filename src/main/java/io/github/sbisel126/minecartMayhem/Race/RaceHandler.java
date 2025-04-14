@@ -88,7 +88,7 @@ public class RaceHandler {
                 }
 
                 // in addition, here is where we can tap in and add an x min race kill-switch
-                if (elapsedTime > 500) {
+                if (elapsedTime > 800) {
                     // kick everyone who is still racing out
                     // they didn't finish, they don't get a score.
 
