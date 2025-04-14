@@ -301,9 +301,9 @@ public class DatabaseHandler {
         String query = "INSERT INTO TopScores (map_id, player_id, top_score) VALUES (?, ?, ?);";
         // we use this format of createStatement, execute, as we do not expect a return value from the DB.
         try(PreparedStatement statement = dbConnection.prepareStatement(query)) {
-            statement.setString(1, String.valueOf(MapID));
+            statement.setInt(1, MapID);
             statement.setString(2, UserUUID);
-            statement.setString(3, String.valueOf(score));
+            statement.setInt(3, score);
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error(Component.text("Error inserting score: " + e.getMessage()));
