@@ -5,32 +5,29 @@ import io.github.sbisel126.minecartMayhem.MinecartHandler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // represents Player information within a race
 public class RacePlayer {
-    int CartColor;
-
-    Player player;
-    String Username;
-    public MinecartHandler minecart;
-    Boolean isRacing = false;
-    int currentLap = 1;
-    Integer finishTime;
-
     private final Map<Integer, Long> checkpointCooldowns = new HashMap<>();
-
-    // list of checkpoints crossed by player
-    // this is used to check if the player has crossed all checkpoints
-    List<Integer> CheckpointsCrossed = new ArrayList<>();
-
+    public MinecartHandler minecart;
     // starting position of the player
     public Integer StartX;
     public Integer StartY;
     public Integer StartZ;
+    int CartColor;
+    Player player;
+    String Username;
+    Boolean isRacing = false;
+    int currentLap = 1;
+    Integer finishTime;
+    // list of checkpoints crossed by player
+    // this is used to check if the player has crossed all checkpoints
+    List<Integer> CheckpointsCrossed = new ArrayList<>();
 
     public RacePlayer(Player player, DatabaseHandler db) {
         // get player's preferred cart color
@@ -60,6 +57,7 @@ public class RacePlayer {
         this.StartY = y;
         this.StartZ = z;
     }
+
     public Player GetPlayer() {
         return player;
     }

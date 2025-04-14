@@ -6,17 +6,21 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 //RaceQueue is the waiting zone that players get assigned before they get placed in the actual race
 //RaceQueue ensures that >1 user is in a race before starting it
 public class RaceQueue {
+    private final List<RacePlayer> playersInQueue = new ArrayList<>(Collections.nCopies(5, null)) {
+    };
     MinecartMayhem plugin;
     RaceHandler race;
     Boolean active = false;
     String MapName;
     private int countdownSeconds = 60;
-    private final List<RacePlayer> playersInQueue = new ArrayList<>(Collections.nCopies(5 ,null)) {};
 
     public RaceQueue(MinecartMayhem plugin, RaceHandler race, String MapName) {
         this.race = race;
@@ -56,15 +60,15 @@ public class RaceQueue {
             int BaseX = 262;
             int BaseY = -59;
             int BaseZ = -52;
-            NewRP.SetStartPos(BaseX + (2*(1+PlayerID)), BaseY, BaseZ);
-            NewRP.player.teleport(new Location(player.getWorld(), BaseX + (2*(1+PlayerID)), BaseY, BaseZ, -175, 5));
+            NewRP.SetStartPos(BaseX + (2 * (1 + PlayerID)), BaseY, BaseZ);
+            NewRP.player.teleport(new Location(player.getWorld(), BaseX + (2 * (1 + PlayerID)), BaseY, BaseZ, -175, 5));
         } else if (Objects.equals(MapName, "sand")) {
             int PlayerID = playersInQueue.indexOf(NewRP);
             int BaseX = -267;
             int BaseY = -60;
             int BaseZ = 50;
-            NewRP.SetStartPos(BaseX + (2*(1+PlayerID)), BaseY, BaseZ);
-            NewRP.player.teleport(new Location(player.getWorld(), BaseX - (2*(1+PlayerID)), BaseY, BaseZ, 0, 5));
+            NewRP.SetStartPos(BaseX + (2 * (1 + PlayerID)), BaseY, BaseZ);
+            NewRP.player.teleport(new Location(player.getWorld(), BaseX - (2 * (1 + PlayerID)), BaseY, BaseZ, 0, 5));
         }
         MinecartHandler MinecartHandler = new MinecartHandler(plugin);
         MinecartHandler.PutPlayerInCart(NewRP, true);
@@ -92,7 +96,7 @@ public class RaceQueue {
                 // will always return 5.
                 int playercount = 0;
                 for (RacePlayer racePlayer : playersInQueue) {
-                    if(racePlayer != null) {
+                    if (racePlayer != null) {
                         playercount++;
                     }
                 }
@@ -123,16 +127,16 @@ public class RaceQueue {
                 }
 
                 // notify players of the countdown
-                if(countdownSeconds == 15 ||countdownSeconds == 30 || countdownSeconds == 60) {
+                if (countdownSeconds == 15 || countdownSeconds == 30 || countdownSeconds == 60) {
                     for (RacePlayer p : playersInQueue) {
-                        if(p == null) {
+                        if (p == null) {
                             continue;
                         }
                         p.player.sendMessage("Race starting in " + countdownSeconds + " seconds...");
                     }
                 } else if (countdownSeconds <= 5) {
                     for (RacePlayer p : playersInQueue) {
-                        if(p == null) {
+                        if (p == null) {
                             continue;
                         }
                         p.player.sendMessage("Race starting in " + countdownSeconds + " seconds...");
@@ -146,6 +150,7 @@ public class RaceQueue {
 
         countdownTask.runTaskTimer(plugin, 0L, 20L); // 20 ticks = 1 second
     }
+
     public void StopChecks() {
         active = false;
     }

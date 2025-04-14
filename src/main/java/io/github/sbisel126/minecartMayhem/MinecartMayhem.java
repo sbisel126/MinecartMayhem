@@ -33,6 +33,7 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
     public RaceQueue GrassRaceQueue;
     public RaceQueue SandRaceQueue;
     public ComponentLogger PluginLogger;
+
     // hello world!
     @Override
     public void onEnable() {

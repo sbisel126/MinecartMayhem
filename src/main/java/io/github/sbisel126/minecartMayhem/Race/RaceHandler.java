@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,22 +17,19 @@ import java.util.Objects;
 // represents a Race and it's relevant information
 public class RaceHandler {
 
+    public Boolean RaceInProgress = false;
+    // these are the list of Checkpoints for each map
+    // we just load these manually later
+    public List<Checkpoint> Checkpoints = new ArrayList<>();
     List<RacePlayer> players = new ArrayList<>();
     DatabaseHandler db;
     MinecartMayhem plugin;
     String MapName;
-    public Boolean RaceInProgress = false;
     int RealPlayerCount = 0;
-
     int CompletedRacerCount = 0;
-
     // for the race timer
     private int elapsedTime = 0;
     private BukkitRunnable raceTimer;
-
-    // these are the list of Checkpoints for each map
-    // we just load these manually later
-    public List<Checkpoint> Checkpoints = new ArrayList<>();
 
     public RaceHandler(MinecartMayhem plugin, String MapName) {
         this.db = plugin.db;
@@ -135,28 +133,28 @@ public class RaceHandler {
         }
     }
 
-    public int scoreRace(){
+    public int scoreRace() {
         int totalScore = 100;
 
         // catch edge case where elapsedTime can be 0.  Avoids a divide-by-zero.
-        if (this.elapsedTime <= 0){
+        if (this.elapsedTime <= 0) {
             totalScore = 0;
-        }else {
+        } else {
             totalScore *= (int) Math.floor(((1024.00 / this.elapsedTime) * 256.00));
         }
         return totalScore;
     }
 
-    public boolean isHighScore(Player player, Integer score){
+    public boolean isHighScore(Player player, Integer score) {
         ArrayList<Integer> scores = db.GetMapTopScores(MapName);
-        if (!scores.isEmpty()){
-            if(score > db.GetMapTopScores(MapName).getLast()){
+        if (!scores.isEmpty()) {
+            if (score > db.GetMapTopScores(MapName).getLast()) {
                 db.InsertHighScore(player, MapName, score);
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }else{
+        } else {
             db.InsertHighScore(player, MapName, score);
             return true;
         }
@@ -165,24 +163,24 @@ public class RaceHandler {
     private void displayRaceStartGraphic(RacePlayer p) {
         Player player = p.player;
         // Play the first sound immediately
-        player.showTitle(Title.title(Component.text("3", NamedTextColor.RED),Component.text("")));
+        player.showTitle(Title.title(Component.text("3", NamedTextColor.RED), Component.text("")));
         player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1F, 0.67F);
 
         // After 1 second (20 ticks)
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.showTitle(Title.title(Component.text("2", NamedTextColor.RED),Component.text("")));
+            player.showTitle(Title.title(Component.text("2", NamedTextColor.RED), Component.text("")));
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 0.67F);
         }, 20L);
 
         // After 2 seconds (40 ticks)
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.showTitle(Title.title(Component.text("1", NamedTextColor.RED),Component.text("")));
+            player.showTitle(Title.title(Component.text("1", NamedTextColor.RED), Component.text("")));
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 0.67F);
         }, 40L);
 
         // After 3 seconds (60 ticks) – start the race
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            player.showTitle(Title.title(Component.text("Go!", NamedTextColor.GREEN),Component.text("")));
+            player.showTitle(Title.title(Component.text("Go!", NamedTextColor.GREEN), Component.text("")));
             player.getWorld().playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1, 1.33F);
             player.sendMessage("Race started!");
 
@@ -212,8 +210,6 @@ public class RaceHandler {
             Checkpoints.add(new Checkpoint(plugin, 6, 487, -59, -94, 272, -59, -94));
             Checkpoints.add(new Checkpoint(plugin, 7, 470, -59, 41, 470, -59, 57));
             Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -59, 41));
-            // Checkpoints.add(new Checkpoint(plugin, 9, 282, -63, 57, 282, -63, 42));
-            // Checkpoints.add(new Checkpoint(plugin, 10, 264, -63, 25, 273, -63, 25));
         } else if (Objects.equals(this.MapName, "sand")) {
             Checkpoints.add((new Checkpoint(plugin, 0, -264, -60, 55, -278, -60, 55)));
             Checkpoints.add(new Checkpoint(plugin, 1, -265, -60, 139, -277, -60, 139));

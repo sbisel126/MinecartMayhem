@@ -13,15 +13,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.ArmorStand;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import org.bukkit.inventory.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,14 +34,15 @@ public class MinecartHandler {
     private BukkitTask task;
     private Boat boat;
     private ArmorStand modelStand;
+
     public MinecartHandler(MinecartMayhem plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
     public void PutPlayerInCart(RacePlayer RP, boolean useBirchBoat) {
-        Player player= RP.GetPlayer();
-        Location loc=player.getLocation();
+        Player player = RP.GetPlayer();
+        Location loc = player.getLocation();
         Boat boat = (Boat) player.getWorld().spawnEntity(loc, useBirchBoat ? EntityType.BIRCH_BOAT : EntityType.ACACIA_BOAT);
         boat.setSilent(true);
         boat.setInvulnerable(true);
@@ -177,7 +178,7 @@ public class MinecartHandler {
             }
         });
 
-       task = new BukkitRunnable() {
+        task = new BukkitRunnable() {
             @Override
             public void run() {
                 // if something we don't like happens, just send the player back to the spawn area and remove them from the race.
@@ -223,14 +224,14 @@ public class MinecartHandler {
 
                     if (climbing) {
                         // Apply climbing velocity only if boat isn't already moving too fast up
-                            if (boat.getVelocity().getY() < 1) {
-                                boat.setVelocity(direction.multiply(1.1).add(new Vector(0, 0.8, 0)));
-                            }
-                    } else {    
+                        if (boat.getVelocity().getY() < 1) {
+                            boat.setVelocity(direction.multiply(1.1).add(new Vector(0, 0.8, 0)));
+                        }
+                    } else {
                         // Normal forward movement
                         boat.setVelocity(direction.multiply(1.5).add(new Vector(0, -0.5, 0))); // Adjust forward speed if needed
                     }
-                boat.getWorld().spawnParticle(Particle.CLOUD, boat.getLocation(), 4, 0.2, 0.2, 0.2, 0.01);
+                    boat.getWorld().spawnParticle(Particle.CLOUD, boat.getLocation(), 4, 0.2, 0.2, 0.2, 0.01);
                 } else if (state == -1) { // Backward
                     Vector direction = boat.getLocation().getDirection().normalize();
                     direction.setZ(-direction.getZ());
@@ -240,7 +241,7 @@ public class MinecartHandler {
                     // Gradually slow down when not moving
                     boat.setVelocity(boat.getVelocity().multiply(0.8));
                 }
-        
+
             }
         }.runTaskTimer(plugin, 0L, 1L); // Runs every tick (20 ticks per second)
     }
@@ -254,7 +255,7 @@ public class MinecartHandler {
             task.cancel();
         }
         this.boat.remove();
-         if (modelStand != null) modelStand.remove();
+        if (modelStand != null) modelStand.remove();
     }
 
 }

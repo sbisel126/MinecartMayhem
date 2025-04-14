@@ -1,22 +1,23 @@
 package io.github.sbisel126.minecartMayhem;
 
 // for logging to terminal
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.entity.Player;
 
-// awesome documentation of java SQL https://docs.oracle.com/javase/tutorial/jdbc/basics/processingsqlstatements.html
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
 // begin class
 public class DatabaseHandler {
+    private final MinecartMayhem instance;
     ComponentLogger logger;
     private Connection dbConnection;
     private Boolean connected = false;
-    private final MinecartMayhem instance;
-    public DatabaseHandler(MinecartMayhem mm){
+
+    public DatabaseHandler(MinecartMayhem mm) {
         this.logger = mm.PluginLogger;
         this.instance = mm;
 
@@ -28,7 +29,7 @@ public class DatabaseHandler {
     }
 
     // initializes a connection to the database
-    private void connect(){
+    private void connect() {
         if (!instance.getDataFolder().exists()) {
             instance.getDataFolder().mkdirs();
         }
@@ -42,10 +43,10 @@ public class DatabaseHandler {
 
         try {
             dbConnection = DriverManager.getConnection(url);
-            if (dbConnection != null){
+            if (dbConnection != null) {
                 connected = true;
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -98,7 +99,7 @@ public class DatabaseHandler {
 
     //table creation functions
     private void createPlayersTable() {
-        try(Statement statement = dbConnection.createStatement()) {
+        try (Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE Players (player_id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, UUID TEXT);");
         } catch (SQLException e) {
             logger.error(Component.text("Error creating table: " + e.getMessage()));
@@ -106,7 +107,7 @@ public class DatabaseHandler {
     }
 
     private void createMapsTable() {
-        try(Statement statement = dbConnection.createStatement()) {
+        try (Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE Maps (map_id INTEGER PRIMARY KEY AUTOINCREMENT, map_name TEXT);");
             statement.execute("INSERT INTO Maps (map_name) VALUES ('grass');");
             statement.execute("INSERT INTO Maps (map_name) VALUES ('sand');");
@@ -116,7 +117,7 @@ public class DatabaseHandler {
     }
 
     private void createTopScoresTable() {
-        try(Statement statement = dbConnection.createStatement()) {
+        try (Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE TopScores (score_id INTEGER PRIMARY KEY AUTOINCREMENT, map_id INTEGER, player_id INTEGER, top_score INTEGER, FOREIGN KEY(map_id) REFERENCES Maps(map_id), FOREIGN KEY(player_id) REFERENCES Players(player_id));");
         } catch (SQLException e) {
             logger.error(Component.text("Error creating table: " + e.getMessage()));
@@ -124,7 +125,7 @@ public class DatabaseHandler {
     }
 
     private void createPlayerConfigTable() {
-        try(Statement statement = dbConnection.createStatement()) {
+        try (Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE PlayerConfig (player_id INTEGER PRIMARY KEY,boat_color INTEGER, FOREIGN KEY (player_id) REFERENCES Players(player_id));");
         } catch (SQLException e) {
             logger.error(Component.text("Error creating table: " + e.getMessage()));
@@ -140,7 +141,7 @@ public class DatabaseHandler {
             if (rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             logger.error(Component.text("Error getting player's boat color id: " + e.getMessage()));
         }
         return -1;
@@ -150,7 +151,7 @@ public class DatabaseHandler {
         // to do this, we update the PlayerConfig Table with the relevant value
         int playerID = GetPlayerID(player.getName());
         String query = "UPDATE PlayerConfig SET boat_color=? WHERE player_id=?";
-        try(PreparedStatement statement = dbConnection.prepareStatement(query)) {
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
             statement.setString(1, String.valueOf(color));
             statement.setString(2, String.valueOf(playerID));
             statement.executeUpdate();
@@ -199,11 +200,12 @@ public class DatabaseHandler {
             if (rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             logger.error(Component.text("Error getting map id: " + e.getMessage()));
         }
         return -1;
     }
+
     // Converts Username String to PlayerID Integer
     // returns -1 if map not found
     public int GetPlayerID(String username) {
@@ -214,7 +216,7 @@ public class DatabaseHandler {
             if (rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             logger.error(Component.text("Error getting player id: " + e.getMessage()));
         }
         return -1;
@@ -243,7 +245,7 @@ public class DatabaseHandler {
         String UserUUID = String.valueOf(user.getUniqueId());
         String query = "INSERT INTO Players (username, uuid) VALUES (?, ?);";
         // we use this format of createStatement, execute, as we do not expect a return value from the DB.
-        try(PreparedStatement statement = dbConnection.prepareStatement(query)) {
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
             statement.setString(1, user.getName());
             statement.setString(2, UserUUID);
             statement.executeUpdate();
@@ -255,14 +257,15 @@ public class DatabaseHandler {
         // and finally we create a record of them in PlayerConfig
         int playerID = GetPlayerID(user.getName());
         String PlayerConfigInsertQuery = "INSERT INTO PlayerConfig (player_id, boat_color) VALUES (?, ?);";
-        try(PreparedStatement statement = dbConnection.prepareStatement(PlayerConfigInsertQuery)) {
+        try (PreparedStatement statement = dbConnection.prepareStatement(PlayerConfigInsertQuery)) {
             statement.setString(1, String.valueOf(playerID));
             statement.setString(2, String.valueOf(1));
             statement.executeUpdate();
         } catch (SQLException e) {
             // Is this enough for error handling? I don't think so.
             logger.error(Component.text("Error inserting user to UserConfig: " + e.getMessage()));
-        }    }
+        }
+    }
 
 
     public ArrayList<Integer> GetMapTopScores(String map) {
@@ -282,7 +285,7 @@ public class DatabaseHandler {
             ResultSet rs = statement.executeQuery(query);
 
             // load found scores into list
-            while (rs.next()){
+            while (rs.next()) {
                 scores.add(rs.getInt(1));
             }
 
@@ -294,13 +297,13 @@ public class DatabaseHandler {
         return scores;
     }
 
-    public void InsertHighScore(Player user, String map_name, Integer score){
+    public void InsertHighScore(Player user, String map_name, Integer score) {
         // insert the score into the TopScores table
         int MapID = GetMapID(map_name);
         int playerID = GetPlayerID(user.getName());
         String query = "INSERT INTO TopScores (map_id, player_id, top_score) VALUES (?, ?, ?);";
         // we use this format of createStatement, execute, as we do not expect a return value from the DB.
-        try(PreparedStatement statement = dbConnection.prepareStatement(query)) {
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
             statement.setInt(1, MapID);
             statement.setInt(2, playerID);
             statement.setInt(3, score);

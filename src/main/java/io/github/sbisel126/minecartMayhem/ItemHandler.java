@@ -109,7 +109,9 @@ public class ItemHandler implements Listener {
             player.sendMessage(ChatColor.GREEN + "Item Box placed at " + formatLoc(boxLocation));
             player.playSound(boxLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
         }
-    } @EventHandler
+    }
+
+    @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         if (!(player.getVehicle() instanceof Boat)) return;
@@ -282,6 +284,7 @@ public class ItemHandler implements Listener {
 
         new BukkitRunnable() {
             int ticks = 0;
+
             @Override
             public void run() {
                 if (!player.isOnline() || !shieldedPlayers.contains(uuid)) {
@@ -311,6 +314,7 @@ public class ItemHandler implements Listener {
             player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1f, 1f);
         }
     }
+
     @EventHandler
     public void onCrystalDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof EnderCrystal crystal)) return;
@@ -320,6 +324,7 @@ public class ItemHandler implements Listener {
             event.setCancelled(true); // Cancel the explosion damage
         }
     }
+
     @EventHandler
     public void onProjectileHitCrystal(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof EnderCrystal crystal)) return;

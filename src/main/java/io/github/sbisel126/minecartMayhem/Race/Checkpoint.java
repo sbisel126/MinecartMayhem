@@ -1,9 +1,11 @@
 package io.github.sbisel126.minecartMayhem.Race;
+
 import io.github.sbisel126.minecartMayhem.MinecartMayhem;
 import org.bukkit.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
+
 public class Checkpoint {
     MinecartMayhem plugin;
     // this class defines the region of blocks for a checkpoint.
@@ -20,7 +22,7 @@ public class Checkpoint {
     // the following list contains the blocks that are part of the checkpoint
     // this is a list of blocks that are part of the checkpoint
 
-    List <Block> blocks = new ArrayList<>();
+    List<Block> blocks = new ArrayList<>();
 
     public Checkpoint(MinecartMayhem plugin, int checkpointID, int x1, int y1, int z1, int x2, int y2, int z2) {
         this.plugin = plugin;

@@ -72,7 +72,7 @@ public class RaceMoveListener implements Listener {
                             // player notification
                             player.sendMessage("You got " + getOrdinal(raceHandler.CompletedRacerCount) + " place!");
                             player.sendMessage("Final time: " + racePlayer.getFinishTime() + " seconds");
-                            if (raceHandler.isHighScore(player, score)){
+                            if (raceHandler.isHighScore(player, score)) {
                                 player.sendMessage("New High Score of " + score);
                             }
                             return;

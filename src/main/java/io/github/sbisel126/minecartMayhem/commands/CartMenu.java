@@ -20,16 +20,17 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CartMenu implements Listener, CommandExecutor {
-    private final String invName = "Cart Selector";
     // these define the inventory slots for the Cart Selection menu
     private static final int Cart_one = 10;
     private static final int Cart_two = 12;
     private static final int Cart_three = 14;
     private static final int Cart_four = 16;
+    private final String invName = "Cart Selector";
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final DatabaseHandler db;
 
