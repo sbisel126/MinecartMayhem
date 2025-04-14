@@ -135,6 +135,12 @@ public class RaceHandler {
         }
     }
 
+    public int scoreRace(){
+        int totalScore = 100;
+        totalScore *= (int) ((500.00 / this.elapsedTime) * 2.0);
+        return totalScore;
+    }
+
     private void displayRaceStartGraphic(RacePlayer p) {
         Player player = p.player;
         // Play the first sound immediately
