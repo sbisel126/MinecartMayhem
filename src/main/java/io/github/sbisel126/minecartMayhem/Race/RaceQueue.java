@@ -58,6 +58,13 @@ public class RaceQueue {
             int BaseZ = -52;
             NewRP.SetStartPos(BaseX + (2*(1+PlayerID)), BaseY, BaseZ);
             NewRP.player.teleport(new Location(player.getWorld(), BaseX + (2*(1+PlayerID)), BaseY, BaseZ, -175, 5));
+        } else if (Objects.equals(MapName, "sand")) {
+            int PlayerID = playersInQueue.indexOf(NewRP);
+            int BaseX = -267;
+            int BaseY = -60;
+            int BaseZ = 50;
+            NewRP.SetStartPos(BaseX + (2*(1+PlayerID)), BaseY, BaseZ);
+            NewRP.player.teleport(new Location(player.getWorld(), BaseX - (2*(1+PlayerID)), BaseY, BaseZ, 0, 5));
         }
         MinecartHandler MinecartHandler = new MinecartHandler(plugin);
         MinecartHandler.PutPlayerInCart(NewRP, NewRP.CartColor);
