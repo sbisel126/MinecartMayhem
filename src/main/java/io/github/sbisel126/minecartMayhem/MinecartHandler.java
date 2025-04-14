@@ -1,5 +1,6 @@
 package io.github.sbisel126.minecartMayhem;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -8,14 +9,19 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import io.github.sbisel126.minecartMayhem.Race.RacePlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.bukkit.inventory.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +33,7 @@ public class MinecartHandler {
     private boolean frozenBoat = false;
     private BukkitTask task;
     private Boat boat;
-private ArmorStand modelStand;
+    private ArmorStand modelStand;
     public MinecartHandler(MinecartMayhem plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
