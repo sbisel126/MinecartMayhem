@@ -34,21 +34,70 @@ public class MinecartHandler {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
-    public void PutPlayerInCart(RacePlayer RP, int cartType) {
-        Player player = RP.GetPlayer();
-        Location loc = player.getLocation();
+    public void PutPlayerInCart(RacePlayer RP, boolean useBirchBoat) {
+        Player player= RP.GetPlayer();
+        Location loc=player.getLocation();
+        Boat boat = (Boat) player.getWorld().spawnEntity(loc, useBirchBoat ? EntityType.BIRCH_BOAT : EntityType.ACACIA_BOAT);
+        boat.setSilent(true);
+        boat.setInvulnerable(true);
+        boat.addPassenger(player);
+        boat.setGravity(false); // We handle gravity manually
 
-        this.boat = switch (cartType) {
-            case 2 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.BIRCH_BOAT);
-            case 3 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.ACACIA_BOAT);
-            case 4 -> (Boat) player.getWorld().spawnEntity(loc, EntityType.OAK_BOAT);
-            default -> (Boat) player.getWorld().spawnEntity(loc, EntityType.SPRUCE_BOAT);
+        spawnKartModel(RP, boat);
+        frozenBoat = true;
+
+    }
+
+    private void spawnKartModel(RacePlayer RP, Boat boat) {
+        Player player = RP.GetPlayer();
+
+        // should Get the player's cart model from database
+        int cartChoice = plugin.db.GetPlayerBoatColor(player);
+        int modelId = switch (cartChoice) {
+            case 1 -> 123456;
+            case 2 -> 123457;
+            case 3 -> 123458;
+            case 4 -> 123459;
+            default -> 123456;
         };
 
-        // Make the player ride the boat
-        boat.addPassenger(player);
-        // start boat in frozen state
-        frozenBoat = true;
+// Debug output
+        Bukkit.getLogger().info("[MinecartHandler] " + player.getName() + "'s saved cart = " + cartChoice + " → modelId = " + modelId);
+
+        Location loc = boat.getLocation().clone();
+
+        this.modelStand = (ArmorStand) boat.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
+        modelStand.setInvisible(true);
+        modelStand.setMarker(true);
+        modelStand.setGravity(false);
+        modelStand.setInvulnerable(true);
+        modelStand.setSilent(true);
+
+        ItemStack modelItem = new ItemStack(Material.CARROT_ON_A_STICK);
+        ItemMeta meta = modelItem.getItemMeta();
+        if (meta != null) {
+            meta.setCustomModelData(modelId);
+            modelItem.setItemMeta(meta);
+        }
+        modelStand.setHelmet(modelItem);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!boat.isValid() || !modelStand.isValid() || !player.isOnline()) {
+                    this.cancel();
+                    return;
+                }
+
+                Vector lookDir = boat.getLocation().getDirection().clone().setY(0).normalize();
+                Location predicted = boat.getLocation().clone()
+                        .add(lookDir.multiply(3))
+                        .add(0, 0, 0);
+                predicted.setYaw(boat.getLocation().getYaw());
+                modelStand.teleport(predicted);
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
+
         startBoatControl(RP, boat);
     }
 
