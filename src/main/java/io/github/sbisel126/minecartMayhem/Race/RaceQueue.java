@@ -67,7 +67,7 @@ public class RaceQueue {
             NewRP.player.teleport(new Location(player.getWorld(), BaseX - (2*(1+PlayerID)), BaseY, BaseZ, 0, 5));
         }
         MinecartHandler MinecartHandler = new MinecartHandler(plugin);
-        MinecartHandler.PutPlayerInCart(NewRP, NewRP.CartColor);
+        MinecartHandler.PutPlayerInCart(NewRP, true);
         NewRP.setMinecart(MinecartHandler);
     }
 
