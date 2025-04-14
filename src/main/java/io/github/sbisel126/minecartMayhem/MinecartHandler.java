@@ -179,6 +179,7 @@ public class MinecartHandler {
                     movementState.remove(player);
                     isClimbing.remove(player);
                     boat.remove();
+                    if (modelStand != null) modelStand.remove();
                     // send back to hub area
                     player.teleport(new Location(player.getWorld(), -24, -60, 574));
                     // attempt to remove from all queues and races
