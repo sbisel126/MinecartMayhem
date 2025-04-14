@@ -147,8 +147,18 @@ public class RaceHandler {
         return totalScore;
     }
 
-    private boolean isHighScore(Integer score){
-        return score > db.GetMapTopScores(MapName).getLast();
+    public boolean isHighScore(Player player, Integer score){
+        ArrayList<Integer> scores = db.GetMapTopScores(MapName);
+        if (!scores.isEmpty()){
+            if(score > db.GetMapTopScores(MapName).getLast()){
+                db.InsertHighScore(player, MapName, score);
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
     }
 
     private void displayRaceStartGraphic(RacePlayer p) {

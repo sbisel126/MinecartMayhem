@@ -61,6 +61,7 @@ public class RaceMoveListener implements Listener {
                         if (racePlayer.currentLap == 3) {
                             // end of race logic triggers:
                             racePlayer.setFinishTime(raceHandler.getCurrentRaceTime());
+                            Integer score = raceHandler.scoreRace();
                             racePlayer.setRacing(false);
                             raceHandler.CompletedRacerCount++;
 
@@ -71,6 +72,9 @@ public class RaceMoveListener implements Listener {
                             // player notification
                             player.sendMessage("You got " + getOrdinal(raceHandler.CompletedRacerCount) + " place!");
                             player.sendMessage("Final time: " + formatTime(racePlayer.getFinishTime()));
+                            if (raceHandler.isHighScore(player, score)){
+                                player.sendMessage("New High Score of " + score);
+                            }
                             return;
                         }
                         // so they aren't done yet, lets see if we can increment their lap count or not
