@@ -212,8 +212,8 @@ public class RaceHandler {
             Checkpoints.add(new Checkpoint(plugin, 6, 487, -59, -94, 272, -59, -94));
             Checkpoints.add(new Checkpoint(plugin, 7, 470, -59, 41, 470, -59, 57));
             Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -59, 41));
-            Checkpoints.add(new Checkpoint(plugin, 9, 282, -63, 57, 282, -63, 42));
-            Checkpoints.add(new Checkpoint(plugin, 10, 264, -63, 25, 273, -63, 25));
+            // Checkpoints.add(new Checkpoint(plugin, 9, 282, -63, 57, 282, -63, 42));
+            // Checkpoints.add(new Checkpoint(plugin, 10, 264, -63, 25, 273, -63, 25));
         } else if (Objects.equals(this.MapName, "sand")) {
             Checkpoints.add((new Checkpoint(plugin, 0, -264, -60, 55, -278, -60, 55)));
             Checkpoints.add(new Checkpoint(plugin, 1, -265, -60, 139, -277, -60, 139));

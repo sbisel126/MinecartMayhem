@@ -108,8 +108,8 @@ public class DatabaseHandler {
     private void createMapsTable() {
         try(Statement statement = dbConnection.createStatement()) {
             statement.execute("CREATE TABLE Maps (map_id INTEGER PRIMARY KEY AUTOINCREMENT, map_name TEXT);");
-            statement.execute("INSERT INTO Maps (map_name) VALUES ('Grass');");
-            statement.execute("INSERT INTO Maps (map_name) VALUES ('Sand');");
+            statement.execute("INSERT INTO Maps (map_name) VALUES ('grass');");
+            statement.execute("INSERT INTO Maps (map_name) VALUES ('sand');");
         } catch (SQLException e) {
             logger.error(Component.text("Error creating table: " + e.getMessage()));
         }
