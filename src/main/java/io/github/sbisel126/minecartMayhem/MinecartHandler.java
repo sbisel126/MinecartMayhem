@@ -133,11 +133,11 @@ public class MinecartHandler {
                     movementState.put(player, 1); // Mark as moving forward
 
                     // More precise obstacle detection
-                    Vector direction = player.getLocation().getDirection().normalize();
+                    Vector direction = boat.getLocation().getDirection().normalize();
                     Location boatLoc = boat.getLocation();
 
                     // Check if there's a block at the front lower part of the boat
-                    Location frontLoc = boatLoc.clone().add(direction.clone().multiply(1.2));
+                    Location frontLoc = boatLoc.clone().add(direction.clone().multiply(1.3));
                     frontLoc.setY(boatLoc.getY()); // Check at boat level
 
                     // Check if there's a block in front that the boat needs to climb
@@ -222,11 +222,9 @@ public class MinecartHandler {
 
                     if (climbing) {
                         // Apply climbing velocity only if boat isn't already moving too fast up
-                        if (boat.isOnGround()) {
-                            if (boat.getVelocity().getY() < 0.8) {
-                                boat.setVelocity(direction.multiply(1.0).add(new Vector(0, 0.8, 0))); // Lower speed and lower jump for smoother climbing
+                            if (boat.getVelocity().getY() < 1.5) {
+                                boat.setVelocity(direction.multiply(1.1).add(new Vector(0, 1, 0)));
                             }
-                        }
                     } else {    
                         // Normal forward movement
                         boat.setVelocity(direction.multiply(1.5).add(new Vector(0, -0.5, 0))); // Adjust forward speed if needed
