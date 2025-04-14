@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 // awesome documentation of java SQL https://docs.oracle.com/javase/tutorial/jdbc/basics/processingsqlstatements.html
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 
 // begin class
 public class DatabaseHandler {
@@ -262,4 +263,35 @@ public class DatabaseHandler {
             // Is this enough for error handling? I don't think so.
             logger.error(Component.text("Error inserting user to UserConfig: " + e.getMessage()));
         }    }
+
+
+    public ArrayList<Integer> GetMapTopScores(String map) {
+        // get the map ID
+        int MapID = GetMapID(map);
+        ArrayList<Integer> scores = new ArrayList<>();
+
+        // return empty list in the event that the DB is unable to find top scores for a map.
+        if (MapID == -1) {
+            return new ArrayList<Integer>();
+        }
+        // add map ID to base query
+        String query = "SELECT top_score FROM TopScores WHERE map_id=?";
+        // run the query
+        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
+            statement.setInt(1, MapID);
+            ResultSet rs = statement.executeQuery(query);
+
+            // load found scores into list
+            while (rs.next()){
+                scores.add(rs.getInt(1));
+            }
+
+        } catch (SQLException e) {
+            logger.error(Component.text("Error getting top score from map: " + e.getMessage()));
+        }
+        // return sorted list
+        scores.sort(null);
+        return scores;
+    }
+
 }
