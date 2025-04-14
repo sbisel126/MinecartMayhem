@@ -27,7 +27,7 @@ public class MinecartHandler {
     private boolean frozenBoat = false;
     private BukkitTask task;
     private Boat boat;
-
+private ArmorStand modelStand;
     public MinecartHandler(MinecartMayhem plugin) {
         this.plugin = plugin;
         this.protocolManager = ProtocolLibrary.getProtocolManager();
@@ -221,10 +221,11 @@ public class MinecartHandler {
                                 boat.setVelocity(direction.multiply(1.0).add(new Vector(0, 0.7, 0))); // Lower speed and lower jump for smoother climbing
                             }
                         }
-                    } else {
+                    } else {    
                         // Normal forward movement
                         boat.setVelocity(direction.multiply(1.5).add(new Vector(0, -0.5, 0))); // Adjust forward speed if needed
                     }
+                boat.getWorld().spawnParticle(Particle.CLOUD, boat.getLocation(), 4, 0.2, 0.2, 0.2, 0.01);
                 } else if (state == -1) { // Backward
                     Vector direction = boat.getLocation().getDirection().normalize();
                     direction.setZ(-direction.getZ());
@@ -234,6 +235,7 @@ public class MinecartHandler {
                     // Gradually slow down when not moving
                     boat.setVelocity(boat.getVelocity().multiply(0.8));
                 }
+        
             }
         }.runTaskTimer(plugin, 0L, 1L); // Runs every tick (20 ticks per second)
     }
@@ -247,6 +249,7 @@ public class MinecartHandler {
             task.cancel();
         }
         boat.remove();
+         if (modelStand != null) modelStand.remove();
     }
 
 }
