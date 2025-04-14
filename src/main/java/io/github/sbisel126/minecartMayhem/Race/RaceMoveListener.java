@@ -57,7 +57,7 @@ public class RaceMoveListener implements Listener {
                     }
 
                     if (checkpoint.getCheckpointID() == 0) {
-                        // if player lapcount = 3 we kick them out of the race and log their time
+                        // if player lap count = 3 we kick them out of the race and log their time
                         if (racePlayer.currentLap == 3) {
                             // end of race logic triggers:
                             racePlayer.setFinishTime(raceHandler.getCurrentRaceTime());
