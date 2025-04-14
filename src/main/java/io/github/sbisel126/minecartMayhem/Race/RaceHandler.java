@@ -157,6 +157,7 @@ public class RaceHandler {
                 return false;
             }
         }else{
+            db.InsertHighScore(player, MapName, score);
             return true;
         }
     }
