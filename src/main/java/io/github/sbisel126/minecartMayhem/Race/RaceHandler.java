@@ -202,24 +202,24 @@ public class RaceHandler {
         // kinda yucky!
         if (Objects.equals(this.MapName, "grass")) {
             // finish line is always id 0
-            Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -59, -53));
-            Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -59, -90));
-            Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -59, -31));
-            Checkpoints.add(new Checkpoint(plugin, 4, 272, -59, -161, 274, -59, -168));
-            Checkpoints.add(new Checkpoint(plugin, 5, 312, -59, -168, 312, -59, -161));
-            Checkpoints.add(new Checkpoint(plugin, 6, 487, -59, -94, 272, -59, -94));
-            Checkpoints.add(new Checkpoint(plugin, 7, 470, -59, 41, 470, -59, 57));
-            Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -59, 41));
+            Checkpoints.add(new Checkpoint(plugin, 0, 261, -59, -53, 272, -55, -53));
+            Checkpoints.add(new Checkpoint(plugin, 1, 261, -59, -90, 272, -55, -90));
+            Checkpoints.add(new Checkpoint(plugin, 3, 261, -59, -31, 272, -55, -31));
+            Checkpoints.add(new Checkpoint(plugin, 4, 272, -59, -161, 274, -55, -168));
+            Checkpoints.add(new Checkpoint(plugin, 5, 312, -59, -168, 312, -55, -161));
+            Checkpoints.add(new Checkpoint(plugin, 6, 487, -59, -94, 272, -55, -94));
+            Checkpoints.add(new Checkpoint(plugin, 7, 470, -59, 41, 470, -55, 57));
+            Checkpoints.add(new Checkpoint(plugin, 8, 387, -59, 57, 387, -55, 41));
         } else if (Objects.equals(this.MapName, "sand")) {
-            Checkpoints.add((new Checkpoint(plugin, 0, -264, -60, 55, -278, -60, 55)));
-            Checkpoints.add(new Checkpoint(plugin, 1, -265, -60, 139, -277, -60, 139));
-            Checkpoints.add(new Checkpoint(plugin, 2, -215, -60, 185, -215, -60, 193));
-            Checkpoints.add(new Checkpoint(plugin, 3, -188, -55, 230, -180, -55, 230));
-            Checkpoints.add(new Checkpoint(plugin, 4, -145, -60, 157, -137, -60, 157));
-            Checkpoints.add(new Checkpoint(plugin, 5, -138, -60, 49, -144, -60, 49));
-            Checkpoints.add(new Checkpoint(plugin, 6, -153, -60, -2, -153, -60, -13));
-            Checkpoints.add(new Checkpoint(plugin, 7, -219, -60, -19, -219, -60, -14));
-            Checkpoints.add(new Checkpoint(plugin, 8, -259, -60, -11, -277, -60, -11));
+            Checkpoints.add((new Checkpoint(plugin, 0, -264, -60, 55, -278, -54, 55)));
+            Checkpoints.add(new Checkpoint(plugin, 1, -265, -60, 139, -277, -54, 139));
+            Checkpoints.add(new Checkpoint(plugin, 2, -215, -60, 185, -215, -54, 193));
+            Checkpoints.add(new Checkpoint(plugin, 3, -188, -55, 230, -180, -50, 230));
+            Checkpoints.add(new Checkpoint(plugin, 4, -145, -60, 157, -137, -54, 157));
+            Checkpoints.add(new Checkpoint(plugin, 5, -138, -60, 49, -144, -54, 49));
+            Checkpoints.add(new Checkpoint(plugin, 6, -153, -60, -2, -153, -54, -13));
+            Checkpoints.add(new Checkpoint(plugin, 7, -219, -60, -19, -219, -54, -14));
+            Checkpoints.add(new Checkpoint(plugin, 8, -259, -60, -11, -277, -54, -11));
         }
     }
 }
