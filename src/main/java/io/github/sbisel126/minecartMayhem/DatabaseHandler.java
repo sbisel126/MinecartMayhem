@@ -192,13 +192,14 @@ public class DatabaseHandler {
 
     // Converts map_name String to mapID Integer
     // returns -1 if map not found
-    public int GetMapID(String map_name) {
-        String query = "SELECT map_id FROM Maps WHERE map_name= ?";
-        try (PreparedStatement statement = dbConnection.prepareStatement(query)) {
-            statement.setString(1, map_name);
-            ResultSet rs = statement.executeQuery(query);
-            if (rs.next()) {
-                return rs.getInt(1);
+    public int GetMapID(String mapName) {
+        String sql = "SELECT map_id FROM Maps WHERE map_name = ?";
+        try (PreparedStatement stmt = dbConnection.prepareStatement(sql)) {
+            stmt.setString(1, mapName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("map_id");
+                }
             }
         } catch (SQLException e) {
             logger.error(Component.text("Error getting map id: " + e.getMessage()));
