@@ -34,6 +34,7 @@ public class MinecartHandler {
     private BukkitTask task;
     private Boat boat;
     private ArmorStand modelStand;
+    private PacketAdapter boatInputListener;
 
     public MinecartHandler(MinecartMayhem plugin) {
         this.plugin = plugin;
@@ -113,7 +114,7 @@ public class MinecartHandler {
         // Add this map to track when the boat is climbing
         final Map<Player, Boolean> isClimbing = new HashMap<>();
 
-        protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
+        this.boatInputListener = new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.STEER_VEHICLE) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 if (event.getPlayer() != player) return;
@@ -176,7 +177,10 @@ public class MinecartHandler {
                     isClimbing.put(player, false);
                 }
             }
-        });
+        };
+
+        // Register the packet listener;
+        protocolManager.addPacketListener(boatInputListener);
 
         task = new BukkitRunnable() {
             @Override
@@ -251,11 +255,13 @@ public class MinecartHandler {
     }
 
     public void stopBoatControl() {
-        if (task != null) {
-            task.cancel();
+        if (boatInputListener != null) {
+            protocolManager.removePacketListener(boatInputListener);
+            boatInputListener = null;
         }
-        this.boat.remove();
-        if (modelStand != null) modelStand.remove();
+        if (task != null) task.cancel();
+        boat.remove();
+        modelStand.remove();
     }
 
 }
