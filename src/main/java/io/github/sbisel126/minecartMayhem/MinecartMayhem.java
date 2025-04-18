@@ -3,10 +3,7 @@ package io.github.sbisel126.minecartMayhem;
 import io.github.sbisel126.minecartMayhem.Race.RaceHandler;
 import io.github.sbisel126.minecartMayhem.Race.RaceMoveListener;
 import io.github.sbisel126.minecartMayhem.Race.RaceQueue;
-import io.github.sbisel126.minecartMayhem.commands.CartMenu;
-import io.github.sbisel126.minecartMayhem.commands.DebugCommand;
-import io.github.sbisel126.minecartMayhem.commands.JoinRace;
-import io.github.sbisel126.minecartMayhem.commands.TeleportMenu;
+import io.github.sbisel126.minecartMayhem.commands.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -48,8 +45,10 @@ public class MinecartMayhem extends JavaPlugin implements Listener {
         Objects.requireNonNull(getCommand("cart_menu")).setExecutor(new CartMenu(this));
         Objects.requireNonNull(getCommand("join_race")).setExecutor(new JoinRace(this));
         Objects.requireNonNull(getCommand("debug_command")).setExecutor(new DebugCommand(this));
+        Objects.requireNonNull(getCommand("itemboxwand")).setExecutor(new ItemBoxWandCommand());
         ItemHandler itemBoxManager = new ItemHandler(this);
         Bukkit.getPluginManager().registerEvents(itemBoxManager, this);
+        itemBoxManager.loadItemBoxLocations();
 
         //Crank up some instances of Race for our RaceQueues
         this.GrassRace = new RaceHandler(this, "grass");
