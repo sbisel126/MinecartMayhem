@@ -27,3 +27,5 @@ commands:
     aliases: debug
     permission: debug
     permission-message: no.
+  itemboxwand:
+      description: Gives you the item box wand
