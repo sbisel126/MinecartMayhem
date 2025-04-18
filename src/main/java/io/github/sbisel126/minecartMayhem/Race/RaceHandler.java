@@ -16,7 +16,9 @@ import java.util.Objects;
 
 // represents a Race and it's relevant information
 public class RaceHandler {
-
+    public List<RacePlayer> getPlayers() {
+        return players;
+    }
     public Boolean RaceInProgress = false;
     // these are the list of Checkpoints for each map
     // we just load these manually later
