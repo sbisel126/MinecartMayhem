@@ -28,12 +28,6 @@ public class RaceMoveListener implements Listener {
         };
     }
 
-    private static String formatTime(int secs) {
-        int minutes = secs / 60;
-        int seconds = secs % 60;
-        return String.format("%d:%02d", minutes, seconds);
-    }
-
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
