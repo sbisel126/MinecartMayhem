@@ -57,10 +57,7 @@ public class RaceHandler {
     }
 
     public void StartRace() {
-        // toggle RaceInProgress to prevent users from joining the race
         RaceInProgress = true;
-
-        //display start of race graphic
         for (RacePlayer racePlayer : players) {
             if (racePlayer != null) {
                 RealPlayerCount++;
@@ -68,6 +65,17 @@ public class RaceHandler {
             }
         }
 
+        // Delay to match the countdown (3 seconds = 60 ticks)
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            for (RacePlayer racePlayer : players) {
+                if (racePlayer != null) {
+                    racePlayer.minecart.setFrozenBoat(false);
+                    racePlayer.setRacing(true);
+                    racePlayer.player.sendMessage("Race started!");
+                }
+            }
+            startRaceTimer();
+        }, 60L); // Delay matches "GO!" graphic timing
     }
 
     // starts the auto-incrementing timer
@@ -193,7 +201,6 @@ public class RaceHandler {
                 }
             }
             //start timer
-            startRaceTimer();
         }, 60L);
     }
 
