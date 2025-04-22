@@ -2,30 +2,45 @@ name: MinecartMayhem
 version: '1.0-SNAPSHOT'
 main: io.github.sbisel126.minecartMayhem.MinecartMayhem
 api-version: '1.21'
+
 commands:
   teleport_menu:
     description: Opens the map selection menu. DEVELOPMENT USE
     usage: /teleport_menu
-    aliases: teleport
-    permission: teleport_menu
+    aliases: [teleport]
+    permission: minecartmayhem.command.teleport_menu
     permission-message: You do not have permission to open the map menu.
+
   cart_menu:
     description: Opens the cart selection menu.
     usage: /cart_menu
-    aliases: cart
-    permission: cart_menu
+    aliases: [cart]
+    permission: minecartmayhem.command.cart_menu
     permission-message: You do not have permission to open the cart menu.
+
   join_race:
     description: Starts the race clock.
     usage: /join_race
-    aliases: race
-    permission: join_race
+    aliases: [race]
+    permission: minecartmayhem.command.join_race
     permission-message: You do not have permission to join a race.
-  debug_command:
-    description: debug
-    usage: /debug_command
-    aliases: debug
-    permission: debug
-    permission-message: no.
+
   itemboxwand:
-      description: Gives you the item box wand
+    description: Gives you the item box wand
+    usage: /itemboxwand
+    permission: minecartmayhem.command.itemboxwand
+    permission-message: You do not have permission to use the item box wand.
+
+permissions:
+  minecartmayhem.command.teleport_menu:
+    description: Allows use of /teleport_menu
+    default: op
+  minecartmayhem.command.cart_menu:
+    description: Allows use of /cart_menu
+    default: true
+  minecartmayhem.command.join_race:
+    description: Allows use of /join_race
+    default: true
+  minecartmayhem.command.itemboxwand:
+    description: Allows use of /itemboxwand
+    default: op
